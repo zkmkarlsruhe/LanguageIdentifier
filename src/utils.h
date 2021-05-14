@@ -60,6 +60,10 @@ class AudioClassifier : public ofxTF2::Model {
 			// downsample and empty the incoming Fifo
 			downsample(bufferFifo, sample, downsamplingFactor);
 
+			ofLog() << std::to_string(sample[0]);
+			normalize(sample);
+			ofLog() << std::to_string(sample[0]);
+
 			// convert recorded sample to a batch of size one
 			ofxTF2::shapeVector tensorShape {1, static_cast<ofxTF2::shape_t>(sample.size()), 1};
 			auto input = ofxTF2::vectorToTensor(sample, tensorShape);
@@ -78,6 +82,23 @@ class AudioClassifier : public ofxTF2::Model {
 		}
 
 	private:
+
+		// inplace normalization
+		void normalize(SimpleAudioBuffer & sample) {
+			// find absolute maximum value
+			float max = 0.0;
+			for (const auto& s : sample) {
+				if (abs(s) > max) {
+					max = abs(s);
+				}
+			}
+			if (max == 0.0)
+				return;
+			for (auto&& s : sample) {
+				s /= max;
+			}
+		}
+
 
 		// downsample by an integer
 		void downsample(AudioBufferFifo & bufferFifo, SimpleAudioBuffer & sample,
