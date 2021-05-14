@@ -24,5 +24,5 @@ static Labels labelsMap = {
     {0, "english"},
     {1, "french"},
     {2, "german"},
-    {3, "russian"},
+    {3, "spanish"},
 };
