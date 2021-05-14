@@ -1,55 +1,43 @@
-# Repo Name
-"Short Description WHAT is it doing?"
+# Language Identification within OpenFrameworks
+Identification of chosen languages from 5s long audio snippets.
  
 This code base has been developed by [ZKM | Hertz-Lab](https://zkm.de/en/about-the-zkm/organization/hertz-lab) as part of the project [»The Intelligent Museum«](#the-intelligent-museum). 
-Please raise issues, ask questions, throw in ideas or submit code, as this repository is intended to be an open platform to collaboratively improve "TOPIC NAME"
+Please raise issues, ask questions, throw in ideas or submit code, as this repository is intended to be an open platform to collaboratively improve langugae identification.
 
-##### Target Platform
-Tested under Ubuntu 18.04 using python 3.7 and tensorflow 2.3
+Copyright (c) 2021 ZKM | Karlsruhe.
 
-##### Features
-* can do this and that
-* achieves blablabla
+BSD Simplified License.
+
+##### Tested Platforms
+- MacBook Pro 2017, MacOS 10.15 & openFrameworks 0.11
 
 ##### Structure
-* folder1/: does that
-* folder2/: has this
+* src/: contains the C++ Code that interfaces with OpenFrameworks
+* bin/: contains the SavedModel trained with TensorFlow2
 
-## Installation
-Download and Install [Anaconda](https://www.anaconda.com/products/individual). Afterwards create a virtual environment:
-```
-$ conda create -n "name" python=3.7
-$ conda activate "name"
-$ pip install -r requirements.txt
-```
+### Installation
+As with all OpenFrameworks examples put this projekt to a folder where '../../../'
+is the root folder of your OpenFrameworks installation.
 
-#### Additional Software 
+### Run this code
+##### Compile
+```shell
+cd $ROOT_OF_THIS_PROJECT
+make
 ```
-$ sudo apt install howaboutthat
+##### Execute
 ```
-
-## Usage
-##### show help
-```
-$ python executable.py --help
-```
-##### scenario 1
-```
-$ python executable.py --parameter 42
+make RunRelease
 ```
 
-## Further Reading
-* [paper](www.google.com)
-* [paper2](www.google.com)
+### Further Reading
+Repo for the training and oder models coming soon...
 
-## License
-use a License
-
-## Contribute
+### Contribute
 Contributions are very welcome!
 Please send an email to author@zkm.de
 
-## The Intelligent Museum
+### The Intelligent Museum
 An artistic-curatorial field of experimentation for deep learning and visitor participation
 
 The [ZKM | Center for Art and Media](https://zkm.de/en) and the [Deutsches Museum Nuremberg](https://www.deutsches-museum.de/en/nuernberg/information/) cooperate with the goal of implementing an AI-supported exhibition. Together with researchers and international artists, new AI-based works of art will be realized during the next four years (2020-2023).  They will be embedded in the AI-supported exhibition in both houses. The Project „The Intelligent Museum“ is funded by the Digital Culture Programme of the [Kulturstiftung des Bundes](https://www.kulturstiftung-des-bundes.de/en) (German Federal Cultural Foundation).
