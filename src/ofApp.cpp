@@ -24,7 +24,7 @@ void ofApp::setup() {
 	ofBackground(54, 54, 54);
 
 	// load the model, bail out on error
-	if(!model.load("model")) {
+	if(!model.load("model_4lang")) {
 		std::exit(EXIT_FAILURE);
 	}
 
