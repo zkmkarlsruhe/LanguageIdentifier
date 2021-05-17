@@ -28,15 +28,6 @@ void ofApp::setup() {
 		std::exit(EXIT_FAILURE);
 	}
 
-	// setup: define the input and output names
-	std::vector<std::string> inputNames = {
-		"serving_default_input",
-	};
-	std::vector<std::string> outputNames = {
-		"StatefulPartitionedCall"
-	};
-	model.setup(inputNames, outputNames);
-
 	// audio stream settings
 	bufferSize = 1023;
 	samplingRate = 48000; // take 16kHz if available then set downsamplingFactor to 1
