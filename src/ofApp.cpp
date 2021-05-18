@@ -15,11 +15,12 @@
 
 #include "ofApp.h"
 
+
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
-	ofSetWindowTitle("example_keyword_spotting");
+	ofSetWindowTitle("ofxLID");
 	ofSetCircleResolution(80);
 	ofBackground(54, 54, 54);
 

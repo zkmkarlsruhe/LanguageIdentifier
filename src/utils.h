@@ -21,6 +21,10 @@
 #include <deque>
 #include <iostream>
 
+#include "wav_file_writer_beta.h"
+
+#include "ofFileUtils.h"
+
 
 // a simple Fifo with adjustable max length
 template <typename T, typename Container=std::deque<T>>
@@ -60,9 +64,18 @@ class AudioClassifier : public ofxTF2::Model {
 			// downsample and empty the incoming Fifo
 			downsample(bufferFifo, sample, downsamplingFactor);
 
-			ofLog() << std::to_string(sample[0]);
 			normalize(sample);
-			ofLog() << std::to_string(sample[0]);
+
+			#if 1
+			std::string file_name(ofToDataPath("test.wav"));
+			sakado::WavFileWriterBeta wfw(file_name, 16000, 2, sample.size());
+			int16_t buf;
+			for (int i = 0; i < sample.size(); i++) {
+				buf = sample[i] *255*100; // scale data to int16 range
+				wfw.Write(&buf, 2, 1);
+			}
+			wfw.Close();
+			#endif
 
 			// convert recorded sample to a batch of size one
 			ofxTF2::shapeVector tensorShape {1, static_cast<ofxTF2::shape_t>(sample.size()), 1};
