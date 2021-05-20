@@ -23,7 +23,7 @@ typedef std::map<int, std::string> Labels;
 static Labels labelsMap = {
     {0, "noise"},
     {1, "english"},
-    {2, "german"},
-    {3, "french"},
+    {2, "french"},
+    {3, "german"},
     {4, "spanish"},
 };
