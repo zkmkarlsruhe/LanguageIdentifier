@@ -15,7 +15,6 @@
 
 #include "ofApp.h"
 
-
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetFrameRate(60);

@@ -1,4 +1,6 @@
-# Language Identification within OpenFrameworks
+Language Identification within OpenFrameworks
+=============================================
+
 Identification of chosen languages from 5s long audio snippets.
  
 This code base has been developed by [ZKM | Hertz-Lab](https://zkm.de/en/about-the-zkm/organization/hertz-lab) as part of the project [»The Intelligent Museum«](#the-intelligent-museum). 
@@ -9,7 +11,8 @@ Copyright (c) 2021 ZKM | Karlsruhe.
 BSD Simplified License.
 
 ##### Tested Platforms
-- MacBook Pro 2017, MacOS 10.15 & openFrameworks 0.11
+- MacBook Pro 2017, macOS 10.15 & openFrameworks 0.11.2
+- MacBook Pro 2018, macOS 11.3.1 & openFrameworks 0.11.2
 
 ##### Structure
 * src/: contains the C++ Code that interfaces with OpenFrameworks
@@ -31,7 +34,7 @@ make RunRelease
 ```
 
 ### Further Reading
-Repo for the training and oder models coming soon...
+Repo for the training and other models coming soon...
 
 ### Contribute
 Contributions are very welcome!

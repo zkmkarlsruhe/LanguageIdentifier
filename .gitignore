@@ -1,6 +1,9 @@
+# TODO please fill me
 
-// TODO: please fill me
-
+*.xcodeproj
+*.xcconfig
+openFrameworks-Info.plist
+bin/data/*.wav
 
 # Python
 __pycache__

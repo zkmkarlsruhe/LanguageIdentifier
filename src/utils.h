@@ -25,7 +25,6 @@
 
 #include "ofFileUtils.h"
 
-
 // a simple Fifo with adjustable max length
 template <typename T, typename Container=std::deque<T>>
 class FixedFifo : public std::queue<T, Container> {
