@@ -85,13 +85,13 @@ class ofApp : public ofBaseApp {
 		bool trigger = false;
 		bool enable = true;
 		bool recording = true;
-        bool blink = true; // recording blink state
-        float blinkTimestamp = 0; // blink timestamp
+		bool blink = true; // recording blink state
+		float blinkTimestamp = 0; // blink timestamp
 
 
-        // osc
-        ofxOscSender sender;
-        int port = 9999;
-        std::string host = "localhost";
-        bool recordingStarted = false;
+		// osc
+		ofxOscSender sender;
+		int port = 9999;
+		std::string host = "localhost";
+		bool recordingStarted = false;
 };

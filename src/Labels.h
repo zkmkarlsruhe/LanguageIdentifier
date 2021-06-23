@@ -21,9 +21,9 @@
 typedef std::map<int, std::string> Labels;
 
 static Labels labelsMap = {
-    {0, "noise"},
-    {1, "english"},
-    {2, "french"},
-    {3, "german"},
-    {4, "spanish"},
+	{0, "noise"},
+	{1, "english"},
+	{2, "french"},
+	{3, "german"},
+	{4, "spanish"},
 };

@@ -26,7 +26,7 @@ void ofApp::setup() {
 	// load the model, bail out on error
 	//std::string modelName = "model_4lang";  // model v1
 	std::string modelName = "model_attrnn"; // model v2
-    if(!model.load(modelName)) {
+	if(!model.load(modelName)) {
 		std::exit(EXIT_FAILURE);
 	}
 
@@ -78,8 +78,8 @@ void ofApp::setup() {
 	ofLog() << "Setup done";
 	ofLog() << "============================";
 
-    // osc
-    sender.setup(host, port);
+	// osc
+	sender.setup(host, port);
 }
 
 //--------------------------------------------------------------
@@ -104,11 +104,11 @@ void ofApp::update() {
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
 			ofxOscMessage message;
-    		message.setAddress("/lang");
-    		message.addIntArg(argMax);
-    		message.addStringArg(labelsMap[argMax]);
-            message.addFloatArg(prob * 100);
-    		sender.sendMessage(message);
+			message.setAddress("/lang");
+			message.addIntArg(argMax);
+			message.addStringArg(labelsMap[argMax]);
+			message.addFloatArg(prob * 100);
+			sender.sendMessage(message);
 		}
 		else {
 			displayLabel = " ";
@@ -123,21 +123,21 @@ void ofApp::update() {
 		trigger = false;
 		enable = true;
 
-        // detection stopped
-        ofxOscMessage message;
-        message.setAddress("/detecting");
-        message.addIntArg(0);
-        sender.sendMessage(message);
+		// detection stopped
+		ofxOscMessage message;
+		message.setAddress("/detecting");
+		message.addIntArg(0);
+		sender.sendMessage(message);
 	}
 
-    if(recordingStarted) {
-        // detection started
-        ofxOscMessage message;
-        message.setAddress("/detecting");
-        message.addIntArg(1);
-        sender.sendMessage(message);
-        recordingStarted = false;
-    }
+	if(recordingStarted) {
+		// detection started
+		ofxOscMessage message;
+		message.setAddress("/detecting");
+		message.addIntArg(1);
+		sender.sendMessage(message);
+		recordingStarted = false;
+	}
 }
 
 //--------------------------------------------------------------
@@ -178,18 +178,18 @@ void ofApp::draw() {
 		ofPopMatrix();
 	ofPopStyle();
 
-    // draw recording status
-    if(recording) {
-        if(ofGetElapsedTimef() - blinkTimestamp >= 0.5) {
-            blink = !blink;
-            blinkTimestamp = ofGetElapsedTimef();
-        }
-        if(blink) {
-            ofSetColor(245, 64, 64);
-            ofFill();
-            ofDrawCircle(ofGetWidth() - 50, 50, 6);
-        }
-    }
+	// draw recording status
+	if(recording) {
+		if(ofGetElapsedTimef() - blinkTimestamp >= 0.5) {
+			blink = !blink;
+			blinkTimestamp = ofGetElapsedTimef();
+		}
+		if(blink) {
+			ofSetColor(245, 64, 64);
+			ofFill();
+			ofDrawCircle(ofGetWidth() - 50, 50, 6);
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -225,9 +225,9 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		recordingCounter = sampleBuffers.size();
 		// trigger recording in the next function call
 		recording = true;
-        recordingStarted = true;
-        blink = true;
-        blinkTimestamp = ofGetElapsedTimef();
+		recordingStarted = true;
+		blink = true;
+		blinkTimestamp = ofGetElapsedTimef();
 	}
 	// if we didnt just trigger
 	else { 
