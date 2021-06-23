@@ -146,10 +146,10 @@ void ofApp::draw() {
 	std::size_t historyWidth = 400;
 	std::size_t historyHeight = 150;
 
-	// draw current label
+	// draw current label status
 	ofSetColor(64, 245, 221);
 	ofNoFill();
-	ofDrawBitmapString(displayLabel, 50, 50);
+	ofDrawBitmapString((recording ? "listening..." : displayLabel), 50, 50);
 
 	// draw the average volume
 	ofPushStyle();
