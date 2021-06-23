@@ -24,6 +24,12 @@ Dependencies
   - [ofxTensorFlow2](https://github.com/zkmkarlsruhe/ofxTensorFlow2)
 * Pre-trained language id model(s) placed in `bin/data` (included in this repo)
 
+Tested Platforms
+----------------
+
+* MacBook Pro 2017, macOS 10.15 & openFrameworks 0.11.2
+* MacBook Pro 2018, macOS 11.3.1 & openFrameworks 0.11.2
+
 Structure
 ---------
 
@@ -92,11 +98,21 @@ Message specification:
   - name: string, language map name
   - confidence: float, confidence percentage 0 - 100
 
-Tested Platforms
-----------------
+Demos
+-----
 
-* MacBook Pro 2017, macOS 10.15 & openFrameworks 0.11.2
-* MacBook Pro 2018, macOS 11.3.1 & openFrameworks 0.11.2
+The demos consist of rapid prototypes built using the following components:
+
+* language identifier
+* visual front end: [loaf](http://danomatika.com/code/loaf)
+
+Custom visual front ends are written in Lua for [loaf](http://danomatika.com/code/loaf), a Lua interpreter with bindings for [openFrameworks](http://openframeworks.cc/) which includes a built-in Open Sound Control (OSC) server.
+
+### Usage
+
+To set up a run environment on macOS, download oaf and place the .app in the system `/Applications` folder.
+
+To run a loaf project, drag the main Lua script or project folder onto the loaf.app.
 
 The Intelligent Museum
 ----------------------
