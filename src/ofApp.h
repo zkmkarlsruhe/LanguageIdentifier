@@ -85,6 +85,9 @@ class ofApp : public ofBaseApp {
 		bool trigger = false;
 		bool enable = true;
 		bool recording = true;
+        bool blink = true; // recording blink state
+        float blinkTimestamp = 0; // blink timestamp
+
 
         // osc
         ofxOscSender sender;

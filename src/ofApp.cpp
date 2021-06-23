@@ -149,7 +149,7 @@ void ofApp::draw() {
 	// draw current label status
 	ofSetColor(64, 245, 221);
 	ofNoFill();
-	ofDrawBitmapString((recording ? "listening..." : displayLabel), 50, 50);
+	ofDrawBitmapString(displayLabel, 50, 50);
 
 	// draw the average volume
 	ofPushStyle();
@@ -177,6 +177,19 @@ void ofApp::draw() {
 			
 		ofPopMatrix();
 	ofPopStyle();
+
+    // draw recording status
+    if(recording) {
+        if(ofGetElapsedTimef() - blinkTimestamp >= 0.5) {
+            blink = !blink;
+            blinkTimestamp = ofGetElapsedTimef();
+        }
+        if(blink) {
+            ofSetColor(245, 64, 64);
+            ofFill();
+            ofDrawCircle(ofGetWidth() - 50, 50, 6);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -213,6 +226,8 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		// trigger recording in the next function call
 		recording = true;
         recordingStarted = true;
+        blink = true;
+        blinkTimestamp = ofGetElapsedTimef();
 	}
 	// if we didnt just trigger
 	else { 
@@ -233,9 +248,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		}
 
 	}
-
 }
-
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
