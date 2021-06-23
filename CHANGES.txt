@@ -1,0 +1,15 @@
+0.2.0: TBA
+
+* added OSC sending
+* added on screen recording status indicator
+* added newer attrnn default model
+* added changelog
+
+* renamed project to "Language Identifier"
+* source file format improvements and renaming
+
+* ignore generated xcode project files
+
+0.1.0: 2021 May 20
+
+initial version for testing
