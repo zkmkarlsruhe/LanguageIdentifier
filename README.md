@@ -1,15 +1,17 @@
 Language Identifier
 ===================
 
+![screenshot](media/screenshot.png)
+
 Identification of chosen languages from 5s long audio snippets
  
 This code base has been developed by [ZKM | Hertz-Lab](https://zkm.de/en/about-the-zkm/organization/hertz-lab) as part of the project [»The Intelligent Museum«](#the-intelligent-museum). 
 
 Please raise issues, ask questions, throw in ideas or submit code, as this repository is intended to be an open platform to collaboratively improve langugae identification.
 
-Copyright (c) 2021 ZKM | Karlsruhe.
-Copyright (c) 2021 Paul Bethge.
-Copyright (c) 2021 Dan Wilcox.
+Copyright (c) 2021 ZKM | Karlsruhe.  
+Copyright (c) 2021 Paul Bethge.  
+Copyright (c) 2021 Dan Wilcox.  
 
 BSD Simplified License.
 
