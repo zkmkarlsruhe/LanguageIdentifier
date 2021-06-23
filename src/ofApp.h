@@ -1,5 +1,5 @@
 /*
- * ofxTensorFlow2
+ *  * Language Identifier
  *
  * Copyright (c) 2021 ZKM | Hertz-Lab
  * Paul Bethge <bethge@zkm.de>
@@ -17,6 +17,7 @@
 
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
+#include "ofxOsc.h"
 #include "labels.h"
 
 // AudioBufferFifo & AudioClassifier model defined in utils.h
@@ -28,6 +29,7 @@ class ofApp : public ofBaseApp {
 
 		void setup();
 		void update();
+		void exit();
 		void draw();
 
 		void audioIn(ofSoundBuffer & input);
@@ -84,4 +86,10 @@ class ofApp : public ofBaseApp {
 		bool trigger = false;
 		bool enable = true;
 		bool recording = true;
+
+        // osc
+        ofxOscSender sender;
+        int port = 9999;
+        std::string host = "localhost";
+        bool recordingStarted = false;
 };

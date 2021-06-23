@@ -1,5 +1,5 @@
 /*
- * ofxTensorFlow2
+ * Language Identifier
  *
  * Copyright (c) 2021 ZKM | Hertz-Lab
  * Paul Bethge <bethge@zkm.de>

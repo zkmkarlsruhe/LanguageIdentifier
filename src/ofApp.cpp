@@ -1,5 +1,5 @@
 /*
- * ofxTensorFlow2
+ * Language Identifier
  *
  * Copyright (c) 2021 ZKM | Hertz-Lab
  * Paul Bethge <bethge@zkm.de>
@@ -19,12 +19,13 @@
 void ofApp::setup() {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
-	ofSetWindowTitle("ofxLID");
+	ofSetWindowTitle("Language Identifier");
 	ofSetCircleResolution(80);
 	ofBackground(54, 54, 54);
 
 	// load the model, bail out on error
-	if(!model.load("model_4lang")) {
+	//if(!model.load("model_4lang")) {
+    if(!model.load("model_attrnn")) {
 		std::exit(EXIT_FAILURE);
 	}
 
@@ -75,6 +76,9 @@ void ofApp::setup() {
 	output = model.runModel(test);
 	ofLog() << "Setup done";
 	ofLog() << "============================";
+
+    // osc
+    sender.setup(host, port);
 }
 
 //--------------------------------------------------------------
@@ -95,9 +99,15 @@ void ofApp::update() {
 		float prob;
 		model.classify(sampleBuffers, downsamplingFactor, argMax, prob);
 
-		// only display label when probabilty is high enough
+		// only send & display label when probabilty is high enough
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
+			ofxOscMessage message;
+    		message.setAddress("/lang");
+    		message.addIntArg(argMax);
+    		message.addStringArg(labelsMap[argMax]);
+            message.addFloatArg(prob * 100);
+    		sender.sendMessage(message);
 		}
 		else {
 			displayLabel = " ";
@@ -111,7 +121,22 @@ void ofApp::update() {
 		// release the trigger signal and emit enable
 		trigger = false;
 		enable = true;
+
+        // detection stopped
+        ofxOscMessage message;
+        message.setAddress("/detecting");
+        message.addIntArg(0);
+        sender.sendMessage(message);
 	}
+
+    if(recordingStarted) {
+        // detection started
+        ofxOscMessage message;
+        message.setAddress("/detecting");
+        message.addIntArg(1);
+        sender.sendMessage(message);
+        recordingStarted = false;
+    }
 }
 
 //--------------------------------------------------------------
@@ -154,6 +179,14 @@ void ofApp::draw() {
 }
 
 //--------------------------------------------------------------
+void ofApp::exit() {
+    ofxOscMessage message;
+    message.setAddress("/detecting");
+    message.addIntArg(0);
+    sender.sendMessage(message);
+}
+
+//--------------------------------------------------------------
 void ofApp::audioIn(ofSoundBuffer & input) {
 
 	// calculate the root mean square which is a rough way to calculate volume
@@ -178,6 +211,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		recordingCounter = sampleBuffers.size();
 		// trigger recording in the next function call
 		recording = true;
+        recordingStarted = true;
 	}
 	// if we didnt just trigger
 	else { 
