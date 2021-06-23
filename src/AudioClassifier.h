@@ -15,21 +15,25 @@
 
 #pragma once
 
-#include "ofxTensorFlow2.h"
-
 #include <queue>
 #include <deque>
 #include <iostream>
 
-#include "wav_file_writer_beta.h"
-
+#include "ofxTensorFlow2.h"
 #include "ofFileUtils.h"
+
+// uncomment to write recorded audio samples to bin/data/test.wav
+//#define DEBUG_WAVE
+#ifdef DEBUG_WAVE
+#include "WavFileWriterBeta.h"
+#endif
 
 // a simple Fifo with adjustable max length
 template <typename T, typename Container=std::deque<T>>
 class FixedFifo : public std::queue<T, Container> {
 
 	public:
+
 		FixedFifo(const std::size_t maxLength=10) : maxLen(maxLength) {}
 
 		void push(const T& value) {
@@ -44,6 +48,7 @@ class FixedFifo : public std::queue<T, Container> {
 		}
 
 	private:
+
 		std::size_t maxLen;
 };
 
@@ -62,19 +67,17 @@ class AudioClassifier : public ofxTF2::Model {
 
 			// downsample and empty the incoming Fifo
 			downsample(bufferFifo, sample, downsamplingFactor);
-
 			normalize(sample);
 
-			#if 1
-			std::string file_name(ofToDataPath("test.wav"));
-			sakado::WavFileWriterBeta wfw(file_name, 16000, 2, sample.size());
+#ifdef DEBUG_WAVE
+			sakado::WavFileWriterBeta wfw(ofToDataPath("test.wav"), 1, 16000, 2, sample.size());
 			int16_t buf;
-			for (int i = 0; i < sample.size(); i++) {
-				buf = sample[i] *255*100; // scale data to int16 range
-				wfw.Write(&buf, 2, 1);
+			for(int i = 0; i < sample.size(); i++) {
+				buf = sample[i] * 25500; // scale data to int16 range
+				wfw.write(&buf, 2, 1);
 			}
-			wfw.Close();
-			#endif
+			wfw.close();
+#endif
 
 			// convert recorded sample to a batch of size one
 			ofxTF2::shapeVector tensorShape {1, static_cast<ofxTF2::shape_t>(sample.size()), 1};
@@ -99,18 +102,18 @@ class AudioClassifier : public ofxTF2::Model {
 		void normalize(SimpleAudioBuffer & sample) {
 			// find absolute maximum value
 			float max = 0.0;
-			for (const auto& s : sample) {
-				if (abs(s) > max) {
+			for(const auto& s : sample) {
+				if(abs(s) > max) {
 					max = abs(s);
 				}
 			}
-			if (max == 0.0)
+			if(max == 0.0) {
 				return;
-			for (auto&& s : sample) {
+			}
+			for(auto&& s : sample) {
 				s /= max;
 			}
 		}
-
 
 		// downsample by an integer
 		void downsample(AudioBufferFifo & bufferFifo, SimpleAudioBuffer & sample,

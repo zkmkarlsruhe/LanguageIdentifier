@@ -24,8 +24,9 @@ void ofApp::setup() {
 	ofBackground(54, 54, 54);
 
 	// load the model, bail out on error
-	//if(!model.load("model_4lang")) {
-    if(!model.load("model_attrnn")) {
+	//std::string modelName = "model_4lang";  // model v1
+	std::string modelName = "model_attrnn"; // model v2
+    if(!model.load(modelName)) {
 		std::exit(EXIT_FAILURE);
 	}
 
@@ -38,7 +39,7 @@ void ofApp::setup() {
 	// downsampling is required for microphones that do not have 16kHz sampling
 	downsamplingFactor = 3;	
 	inputSeconds = 5;
-	inputSamplingRate = 16000; // shall not be changed AI was trained on 16kHz
+	inputSamplingRate = 16000; // shall not be changed, AI was trained on 16kHz
 
 	// recording settings
 	numPreviousBuffers = 10; // how many buffers to save before trigger happens
@@ -63,13 +64,13 @@ void ofApp::setup() {
 	settings.bufferSize = bufferSize;
 	soundStream.setup(settings);
 
-	// print words we know
-	ofLog() << "From src/labels.h:";
-	ofLog() << "----> words to spot";
+	// print language labels we know
+	ofLog() << "From src/Labels.h:";
+	ofLog() << "----> detected languages";
 	for(const auto & label : labelsMap) {
 		ofLog() << label.second;
 	}
-	ofLog() << "<---- words to spot";
+	ofLog() << "<---- detected languages";
 
 	// warm up: inital inference involves initalization (takes longer)
 	auto test = cppflow::fill({1, 80000, 1}, 1.0f);

@@ -1,5 +1,5 @@
 /*
- *  * Language Identifier
+ * Language Identifier
  *
  * Copyright (c) 2021 ZKM | Hertz-Lab
  * Paul Bethge <bethge@zkm.de>
@@ -18,10 +18,9 @@
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
 #include "ofxOsc.h"
-#include "labels.h"
 
-// AudioBufferFifo & AudioClassifier model defined in utils.h
-#include "utils.h"
+#include "AudioClassifier.h"
+#include "Labels.h"
 
 class ofApp : public ofBaseApp {
 
