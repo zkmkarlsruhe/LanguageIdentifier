@@ -90,8 +90,15 @@ class ofApp : public ofBaseApp {
 
 
 		// osc
-		ofxOscSender sender;
-		int port = 9999;
-		std::string host = "localhost";
+		struct OscClient {
+			std::string address;
+			int port;
+		};
+		std::vector<OscClient> hosts = {
+			// add multiple send host address/port pairs if needed
+			{"localhost", 9999},
+			//{"239.200.200.200", 5000} // multicast
+		};
+		std::vector<ofxOscSender*> senders;
 		bool recordingStarted = false;
 };

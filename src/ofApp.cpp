@@ -55,6 +55,7 @@ void ofApp::setup() {
 	ofSoundStreamSettings settings;
 	auto devices = soundStream.getMatchingDevices("default");
 	if(!devices.empty()) {
+		ofLog() << "input device: " << devices[0].name;
 		settings.setInDevice(devices[0]);
 	}
 	settings.setInListener(this);
@@ -79,7 +80,11 @@ void ofApp::setup() {
 	ofLog() << "============================";
 
 	// osc
-	sender.setup(host, port);
+	for(auto host : hosts) {
+		ofxOscSender *sender = new ofxOscSender;
+		sender->setup(host.address, host.port);
+		senders.push_back(sender);
+	}
 }
 
 //--------------------------------------------------------------
@@ -108,7 +113,7 @@ void ofApp::update() {
 			message.addIntArg(argMax);
 			message.addStringArg(labelsMap[argMax]);
 			message.addFloatArg(prob * 100);
-			sender.sendMessage(message);
+			for(auto sender: senders) {sender->sendMessage(message);}
 		}
 		else {
 			displayLabel = " ";
@@ -127,7 +132,7 @@ void ofApp::update() {
 		ofxOscMessage message;
 		message.setAddress("/detecting");
 		message.addIntArg(0);
-		sender.sendMessage(message);
+		for(auto sender: senders) {sender->sendMessage(message);}
 	}
 
 	if(recordingStarted) {
@@ -135,7 +140,7 @@ void ofApp::update() {
 		ofxOscMessage message;
 		message.setAddress("/detecting");
 		message.addIntArg(1);
-		sender.sendMessage(message);
+		for(auto sender: senders) {sender->sendMessage(message);}
 		recordingStarted = false;
 	}
 }
@@ -194,10 +199,14 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-    ofxOscMessage message;
-    message.setAddress("/detecting");
-    message.addIntArg(0);
-    sender.sendMessage(message);
+	ofxOscMessage message;
+	message.setAddress("/detecting");
+	message.addIntArg(0);
+	for(auto sender: senders) {
+		sender->sendMessage(message);
+		delete sender;
+	}
+	senders.clear();
 }
 
 //--------------------------------------------------------------
