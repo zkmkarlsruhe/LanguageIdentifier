@@ -23,6 +23,13 @@ void ofApp::setup() {
 	ofSetCircleResolution(80);
 	ofBackground(54, 54, 54);
 
+	// load the model, bail out on error
+	//std::string modelName = "model_4lang";  // model v1
+	std::string modelName = "model_attrnn"; // model v2
+	if(!model.load(modelName)) {
+		std::exit(EXIT_FAILURE);
+	}
+
 	// recording settings
 	numBuffers = samplingRate * inputSeconds / bufferSize;
 	previousBuffers.setMaxLen(numPreviousBuffers);
@@ -41,12 +48,12 @@ void ofApp::setup() {
 			}
 		}
 		if(inputDevice < 0) {
-			ofLogError() << "no audio input device";
+			ofLogError("LangID") << "no audio input device";
 			std::exit(EXIT_FAILURE);
 		}
 	}
 	auto devices = soundStream.getDeviceList();
-	ofLog() << "audio input device: " << inputDevice << " " << devices[inputDevice].name;
+	ofLogNotice("LangID") << "audio input device: " << inputDevice << " " << devices[inputDevice].name;
 	settings.setInDevice(devices[inputDevice]);
 	settings.setInListener(this);
 	settings.sampleRate = samplingRate;
@@ -54,7 +61,7 @@ void ofApp::setup() {
 	settings.numInputChannels = 1;
 	settings.bufferSize = bufferSize;
 	if(!soundStream.setup(settings)) {
-		ofLogError() << "audio input device " << inputDevice << " setup failed";
+		ofLogError("LangID") << "audio input device " << inputDevice << " setup failed";
 		std::exit(EXIT_FAILURE);
 	}
 
@@ -62,35 +69,29 @@ void ofApp::setup() {
 	volHistory.assign(400, 0.0);
 
 	// print language labels we know
-	ofLog() << "From src/Labels.h:";
-	ofLog() << "----> detected languages";
+	ofLogVerbose("LangID") << "From src/Labels.h:";
+	ofLogVerbose("LangID") << "----> detected languages";
 	for(const auto & label : labelsMap) {
-		ofLog() << label.second;
+		ofLogVerbose("LangID") << label.second;
 	}
-	ofLog() << "<---- detected languages";
-
-	// load the model, bail out on error
-	//std::string modelName = "model_4lang";  // model v1
-	std::string modelName = "model_attrnn"; // model v2
-	if(!model.load(modelName)) {
-		std::exit(EXIT_FAILURE);
-	}
+	ofLogVerbose("LangID") << "<---- detected languages";
 
 	// warm up: inital inference involves initalization (takes longer)
 	auto test = cppflow::fill({1, 80000, 1}, 1.0f);
 	output = model.runModel(test);
-	ofLog() << "Setup done";
-	ofLog() << "============================";
 
 	// osc
-	ofLog() << hosts.size() << " sender host(s)";
+	ofLogNotice("LangID") << hosts.size() << " sender host(s)";
 	for(auto host : hosts) {
 		ofxOscSender *sender = new ofxOscSender;
 		if(sender->setup(host.address, host.port)) {
 			senders.push_back(sender);
-			ofLog() << "  address: " << host.address << " port: " << host.port;
+			ofLogNotice("LangID") << " " << host.address << " " << host.port;
 		}
 	}
+
+	ofLogVerbose("LangID") << "Setup done";
+	ofLogVerbose("LangID") << "============================";
 }
 
 //--------------------------------------------------------------
@@ -126,9 +127,9 @@ void ofApp::update() {
 		}
 
 		// look up label
-		ofLog() << "Label: " << labelsMap[argMax];
-		ofLog() << "Probabilty: " << prob;
-		ofLog() << "============================";
+		ofLogVerbose("LangID") << "Label: " << labelsMap[argMax];
+		ofLogVerbose("LangID") << "Probabilty: " << prob;
+		ofLogVerbose("LangID") << "============================";
 
 		// release the trigger signal and emit enable
 		trigger = false;
@@ -233,7 +234,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 	// trigger recording if the smoothed volume is high enough
 	if(ofMap(smoothedVol, 0.0, 0.17, 0.0, 1.0, true) * 100 >= volThreshold && enable) {
 		enable = false;
-		ofLog() << "Start recording...";
+		ofLogVerbose("LangID") << "Start recording...";
 		// copy previous buffers to the recording
 		sampleBuffers = previousBuffers;
 		sampleBuffers.setMaxLen(numBuffers); // just to make sure (not tested)
@@ -254,7 +255,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 			if(recordingCounter >= numBuffers) {
 				recording = false;
 				trigger = true;
-				ofLog() << "Done!";
+				ofLogVerbose("LangID") << "Done!";
 			}
 		}
 		// if not recording: save the incoming buffer to the previous buffer fifo

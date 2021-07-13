@@ -13,6 +13,7 @@ int main(int argc, char **argv) {
 	bool list = false;
 	int inputNum = -1;
 	std::string inputName = "";
+	bool verbose = false;
 	parser.add_option("-s,--senders", senders,
 		"OSC sender addr:port host pairs, ex. \"192.168.0.100:5555\" "
 		"or multicast \"239.200.200.200:6666\", default \"localhost:9999\""
@@ -27,7 +28,11 @@ int main(int argc, char **argv) {
 	parser.add_option("--inputdev", inputNum, "audio input device number");
 	parser.add_option("--inputname", inputName,
 		"audio input device name, can do partial match ie. \"Microphone\"");
+	parser.add_flag("-v,--verbose", verbose, "verbose printing");
 	CLI11_PARSE(parser, argc, argv);
+
+	// verbose printing?
+	ofSetLogLevel("LangID", (verbose ? OF_LOG_VERBOSE : OF_LOG_NOTICE));
 
 	// list audio input devices
 	if(list) {
@@ -57,7 +62,7 @@ int main(int argc, char **argv) {
 		}
 		ofSoundDevice &device = devices[inputNum];
 		if(device.inputChannels == 0) {
-			ofLogError() << "audio device " << inputNum << " has no input channels";
+			ofLogError("LangID") << "audio device " << inputNum << " has no input channels";
 			return EXIT_FAILURE;
 		}
 		app->inputDevice = inputNum;
@@ -78,7 +83,7 @@ int main(int argc, char **argv) {
 			app->inputDevice = inputNum;
 		}
 		else {
-			ofLogWarning() << "audio input name not found: " << inputName;
+			ofLogWarning("LangID") << "audio input name not found: " << inputName;
 		}
 	}
 
@@ -88,13 +93,13 @@ int main(int argc, char **argv) {
 	for(auto host : senders) {
 		size_t found = host.find_last_of(":");
 		if(found == std::string::npos) {
-			ofLogWarning() << "ignoring sender host without port: " << host;
+			ofLogWarning("LangID") << "ignoring sender host without port: " << host;
 			continue;
 		}
 		std::string addr = host.substr(0, found);
 		std::string port = host.substr(found+1);
 		if(addr.size() == 0 || port.size() == 0) {
-			ofLogWarning() << "ignoring sender host with empty address or port: " << host;
+			ofLogWarning("LangID") << "ignoring sender host with empty address or port: " << host;
 			continue;
 		}
 		if(addr[0] == '[' && addr[addr.size()-1] == ']') {
@@ -102,7 +107,7 @@ int main(int argc, char **argv) {
 		}
 		int p = ofToInt(port);
 		if(p <= 1024) {
-			ofLogWarning() << "ignoring sender host with invalid port or system port: " << host;
+			ofLogWarning("LangID") << "ignoring sender host with invalid port or system port: " << host;
 			continue;
 		}
 		app->hosts.push_back(ofApp::OscHost(addr, p));

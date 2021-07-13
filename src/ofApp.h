@@ -61,7 +61,7 @@ class ofApp : public ofBaseApp {
 		
 		// since volume detection has some latency we keep a history of buffers
 		AudioBufferFifo previousBuffers;
-		std::size_t numPreviousBuffers;
+		std::size_t numPreviousBuffers = 10; // how many buffers to save before trigger happens
 		// sampleBuffers acts as a buffer for recording (could be fused)
 		AudioBufferFifo sampleBuffers;
 		std::size_t numBuffers;
