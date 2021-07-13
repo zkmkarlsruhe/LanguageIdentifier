@@ -47,13 +47,17 @@ class ofApp : public ofBaseApp {
 
 		// audio 
 		ofSoundStream soundStream;
+		int inputDevice = -1;
 
+		// neural network input parameters
 		// for ease of use:
 		// we want to keep the buffersize a multiple of the downsampling factor
-		// downsamplingFactor = micSamplingRate / neuralNetworkInputSamplingRate 
-		std::size_t downsamplingFactor;
-		std::size_t bufferSize;
-		std::size_t samplingRate;
+		// downsamplingFactor = micSamplingRate / neuralNetworkInputSamplingRate
+		std::size_t bufferSize = 1024;
+		std::size_t samplingRate = 48000;
+		// downsamplingFactor must be an integer of samplingRate / inputSamplingeRate
+		// downsampling is required for microphones that do not have 16kHz sampling
+		std::size_t downsamplingFactor = 3;
 		
 		// since volume detection has some latency we keep a history of buffers
 		AudioBufferFifo previousBuffers;
@@ -76,8 +80,8 @@ class ofApp : public ofBaseApp {
 		// neural network	
 		AudioClassifier model;
 		cppflow::tensor output;
-		std::size_t inputSeconds;
-		std::size_t inputSamplingRate;
+		std::size_t inputSeconds = 5;
+		const std::size_t inputSamplingRate = 16000; // AI was trained on 16kHz
 		std::size_t inputSize;
 
 		// neural network control logic
@@ -88,17 +92,13 @@ class ofApp : public ofBaseApp {
 		bool blink = true; // recording blink state
 		float blinkTimestamp = 0; // blink timestamp
 
-
 		// osc
-		struct OscClient {
+		typedef struct OscHost {
 			std::string address;
 			int port;
-		};
-		std::vector<OscClient> hosts = {
-			// add multiple send host address/port pairs if needed
-			{"localhost", 9999},
-			//{"239.200.200.200", 5000} // multicast
-		};
+			OscHost(std::string a, int p) : address(a), port(p) {}
+		} OscHost;
+		std::vector<OscHost> hosts = {};
 		std::vector<ofxOscSender*> senders;
 		bool recordingStarted = false;
 };

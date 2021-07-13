@@ -23,47 +23,43 @@ void ofApp::setup() {
 	ofSetCircleResolution(80);
 	ofBackground(54, 54, 54);
 
-	// load the model, bail out on error
-	//std::string modelName = "model_4lang";  // model v1
-	std::string modelName = "model_attrnn"; // model v2
-	if(!model.load(modelName)) {
-		std::exit(EXIT_FAILURE);
-	}
-
-	// audio stream settings
-	bufferSize = 1023;
-	samplingRate = 48000; // take 16kHz if available then set downsamplingFactor to 1
-
-	// Neural network input parameters
-	// downsamplingFactor must be an integer of samplingRate / inputSamplingeRate
-	// downsampling is required for microphones that do not have 16kHz sampling
-	downsamplingFactor = 3;	
-	inputSeconds = 5;
-	inputSamplingRate = 16000; // shall not be changed, AI was trained on 16kHz
-
 	// recording settings
-	numPreviousBuffers = 10; // how many buffers to save before trigger happens
 	numBuffers = samplingRate * inputSeconds / bufferSize;
 	previousBuffers.setMaxLen(numPreviousBuffers);
 	sampleBuffers.setMaxLen(numBuffers);
 
-	// display 
-	volHistory.assign(400, 0.0);
-
-	// apply settings to soundStream 
-	soundStream.printDeviceList();
+	// apply settings to soundStream
 	ofSoundStreamSettings settings;
-	auto devices = soundStream.getMatchingDevices("default");
-	if(!devices.empty()) {
-		ofLog() << "input device: " << devices[0].name;
-		settings.setInDevice(devices[0]);
+	if(inputDevice < 0) {
+		// find default input device
+		auto devices = soundStream.getDeviceList();
+		for(int i = 0; i < devices.size(); ++i) {
+			auto device = devices[i];
+			if(device.isDefaultInput) {
+				inputDevice = i;
+				break;
+			}
+		}
+		if(inputDevice < 0) {
+			ofLogError() << "no audio input device";
+			std::exit(EXIT_FAILURE);
+		}
 	}
+	auto devices = soundStream.getDeviceList();
+	ofLog() << "audio input device: " << inputDevice << " " << devices[inputDevice].name;
+	settings.setInDevice(devices[inputDevice]);
 	settings.setInListener(this);
 	settings.sampleRate = samplingRate;
 	settings.numOutputChannels = 0;
 	settings.numInputChannels = 1;
 	settings.bufferSize = bufferSize;
-	soundStream.setup(settings);
+	if(!soundStream.setup(settings)) {
+		ofLogError() << "audio input device " << inputDevice << " setup failed";
+		std::exit(EXIT_FAILURE);
+	}
+
+	// display
+	volHistory.assign(400, 0.0);
 
 	// print language labels we know
 	ofLog() << "From src/Labels.h:";
@@ -73,6 +69,13 @@ void ofApp::setup() {
 	}
 	ofLog() << "<---- detected languages";
 
+	// load the model, bail out on error
+	//std::string modelName = "model_4lang";  // model v1
+	std::string modelName = "model_attrnn"; // model v2
+	if(!model.load(modelName)) {
+		std::exit(EXIT_FAILURE);
+	}
+
 	// warm up: inital inference involves initalization (takes longer)
 	auto test = cppflow::fill({1, 80000, 1}, 1.0f);
 	output = model.runModel(test);
@@ -80,10 +83,13 @@ void ofApp::setup() {
 	ofLog() << "============================";
 
 	// osc
+	ofLog() << hosts.size() << " sender host(s)";
 	for(auto host : hosts) {
 		ofxOscSender *sender = new ofxOscSender;
-		sender->setup(host.address, host.port);
-		senders.push_back(sender);
+		if(sender->setup(host.address, host.port)) {
+			senders.push_back(sender);
+			ofLog() << "  address: " << host.address << " port: " << host.port;
+		}
 	}
 }
 
@@ -255,7 +261,6 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		else {
 			previousBuffers.push(input.getBuffer());
 		}
-
 	}
 }
 

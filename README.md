@@ -22,6 +22,7 @@ Dependencies
 * openFrameworks addons:
   - ofxOSC (included with oF)
   - [ofxTensorFlow2](https://github.com/zkmkarlsruhe/ofxTensorFlow2)
+* [CLI11 parser](https://github.com/CLIUtils/CLI11): included in `src`
 * Pre-trained language id model(s) placed in `bin/data` (included in this repo)
 
 Tested Platforms
