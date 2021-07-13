@@ -93,7 +93,7 @@ The openFrameworks application runs the language identification model using audi
 
 ### OSC Communication
 
-Sends to:
+By default, sends to:
 * address: `localhost` ie. `127.0.0.1`
 * port: `9999`
 
@@ -105,6 +105,55 @@ Message specification:
   - index: int, language map index
   - name: string, language map name
   - confidence: float, confidence percentage 0 - 100
+
+### Commandline Options
+
+Additional run time settings are available via commandline options as shown via the `--help` flag output:
+
+```shell
+% bin/LanguageIdentifier --help
+Listens to audio stream, identifies spoken language, and sends over OSC
+Usage: LanguageIdentifier [OPTIONS]
+
+Options:
+  -h,--help                   Print this help message and exit
+  -s,--senders TEXT ...       OSC sender addr:port host pairs, ex. "192.168.0.100:5555" or multicast "239.200.200.200:6666", default "localhost:9999"
+  -c,--confidence FLOAT:FLOAT bounded to [0 - 1]
+                              min confidence, default 0.75
+  -t,--threshold FLOAT:INT bounded to [0 - 100]
+                              volume threshold, default 25
+  -l,--list                   list audio input devices and exit
+  --inputdev INT              audio input device number
+  --inputname TEXT            audio input device name, can do partial match, ex. "Microphone"
+  -v,--verbose                verbose printing
+
+```
+
+For example, to send OSC to multiple addresses use the `-s` option:
+
+```shell
+% bin/LanguageIdentifier -s localhost:9999 localhost:6666 192.168.0.101:7777
+```
+
+#### macOS
+
+For macOS, the application binary can be involked from within the .app bundle to pass commandline arguments:
+
+```shell
+bin/LanguageIdentifier.app/Contents/MacOS/LanguageIdentifier -h
+```
+
+This approach can also be wrapped up into a shell alias to be added to the account's `~/.bash_profile` or `~/.zshrc` file:
+
+```
+alias langid="/Applications/LanguageIdentifier.app/Contents/MacOS/LanguageIdentifier"
+```
+
+Reload the shell and application can now be invoked via:
+
+```shell
+% langid -v --inputdev 2
+```
 
 Demos
 -----
@@ -118,7 +167,7 @@ Custom visual front ends are written in Lua for [loaf](http://danomatika.com/cod
 
 ### Usage
 
-To set up a run environment on macOS, download oaf and place the .app in the system `/Applications` folder.
+To set up a run environment on macOS, download loaf and place the .app in the system `/Applications` folder.
 
 To run a loaf project, drag the main Lua script or project folder onto the loaf.app.
 

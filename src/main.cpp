@@ -24,10 +24,10 @@ int main(int argc, char **argv) {
 	parser.add_option("-t,--threshold", app->volThreshold,
 		"volume threshold, default " + ofToString(app->volThreshold)
 	)->transform(CLI::Bound(0, 100));
-	parser.add_flag("-l,--list", list, "list audio input devices");
+	parser.add_flag("-l,--list", list, "list audio input devices and exit");
 	parser.add_option("--inputdev", inputNum, "audio input device number");
 	parser.add_option("--inputname", inputName,
-		"audio input device name, can do partial match ie. \"Microphone\"");
+		"audio input device name, can do partial match, ex. \"Microphone\"");
 	parser.add_flag("-v,--verbose", verbose, "verbose printing");
 	CLI11_PARSE(parser, argc, argv);
 
