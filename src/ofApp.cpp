@@ -15,6 +15,8 @@
 
 #include "ofApp.h"
 
+const std::size_t ofApp::modelSampleRate = 16000;
+
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetFrameRate(60);
@@ -31,7 +33,7 @@ void ofApp::setup() {
 	}
 
 	// recording settings
-	numBuffers = samplingRate * inputSeconds / bufferSize;
+	numBuffers = sampleRate * inputSeconds / bufferSize;
 	previousBuffers.setMaxLen(numPreviousBuffers);
 	sampleBuffers.setMaxLen(numBuffers);
 
@@ -53,17 +55,27 @@ void ofApp::setup() {
 		}
 	}
 	auto devices = soundStream.getDeviceList();
-	ofLogNotice(PACKAGE) << "audio input device: " << inputDevice << " " << devices[inputDevice].name;
-	settings.setInDevice(devices[inputDevice]);
+	ofSoundDevice &device = devices[inputDevice];
+	ofLogNotice(PACKAGE) << "audio input device: " << inputDevice << " " << device.name;
+	if(inputChannel >= device.inputChannels) {
+		ofLogWarning(PACKAGE) << "audio input device does not have enough input channels";
+		inputChannel = 0;
+	}
+	ofLogNotice(PACKAGE) << "audio input channel: " << inputChannel+1;
+	ofLogNotice(PACKAGE) << "audio input samplerate: " << sampleRate;
+	ofLogNotice(PACKAGE) << "audio input buffer size: " << bufferSize;
+	settings.setInDevice(device);
 	settings.setInListener(this);
-	settings.sampleRate = samplingRate;
+	settings.sampleRate = sampleRate;
 	settings.numOutputChannels = 0;
-	settings.numInputChannels = 1;
+	settings.numInputChannels = device.inputChannels;
 	settings.bufferSize = bufferSize;
 	if(!soundStream.setup(settings)) {
 		ofLogError(PACKAGE) << "audio input device " << inputDevice << " setup failed";
+		ofLogError(PACKAGE) << "perhaps try a different device or samplerate?";
 		std::exit(EXIT_FAILURE);
 	}
+	monoBuffer.resize(bufferSize);
 
 	// display
 	volHistory.assign(400, 0.0);
@@ -219,15 +231,27 @@ void ofApp::exit() {
 //--------------------------------------------------------------
 void ofApp::audioIn(ofSoundBuffer & input) {
 
+	// this shouldn't happen... but we don't let it blow up
+	if(input.getNumFrames() != monoBuffer.size()) {
+		ofLogWarning(PACKAGE) << "resizing mono input buffer to " << input.getNumFrames();
+		monoBuffer.resize(input.getNumFrames());
+	}
+
+	// copy desired channel out of interleaved stream into mono buffer,
+	// assume input stream has enough channels...
+	for(std::size_t i = 0; i < input.getNumFrames(); i++) {
+		monoBuffer[i] = input[i + inputChannel];
+	}
+
 	// calculate the root mean square which is a rough way to calculate volume
 	float sumVol = 0.0;
-	for(size_t i = 0; i < input.getNumFrames(); i++) {
-		float vol = input[i];
+	for(std::size_t i = 0; i < monoBuffer.size(); i++) {
+		float vol = monoBuffer[i];
 		sumVol += vol * vol;
 	}
-	curVol = sumVol / (float)input.getNumFrames();
+	curVol = sumVol / (float)monoBuffer.size();
 	curVol = sqrt(curVol);
-	// smoothen the volume
+	// smooth the volume
 	smoothedVol *= 0.5;
 	smoothedVol += 0.5 * curVol;
 
@@ -260,7 +284,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		}
 		// if not recording: save the incoming buffer to the previous buffer fifo
 		else {
-			previousBuffers.push(input.getBuffer());
+			previousBuffers.push(monoBuffer);
 		}
 	}
 }

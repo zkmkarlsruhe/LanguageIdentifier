@@ -28,7 +28,7 @@
 #include "WavFileWriterBeta.h"
 #endif
 
-// a simple Fifo with adjustable max length
+/// a simple Fifo with adjustable max length
 template <typename T, typename Container=std::deque<T>>
 class FixedFifo : public std::queue<T, Container> {
 
@@ -55,7 +55,7 @@ class FixedFifo : public std::queue<T, Container> {
 typedef std::vector<float> SimpleAudioBuffer;
 typedef FixedFifo<SimpleAudioBuffer> AudioBufferFifo;
 
-// custom ofxTF2::Model implementation to handle audio sample conversion, etc
+/// custom ofxTF2::Model implementation to handle audio sample conversion, etc
 class AudioClassifier : public ofxTF2::Model {
 
 	public:

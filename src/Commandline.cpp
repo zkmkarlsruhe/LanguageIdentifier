@@ -26,6 +26,8 @@ bool Commandline::parse(int argc, char **argv) {
 	bool list = false;
 	int inputNum = -1;
 	std::string inputName = "";
+	int inputChannel = 0;
+	int sampleRate = 0;
 	bool verbose = false;
 	bool version = false;
 
@@ -39,6 +41,9 @@ bool Commandline::parse(int argc, char **argv) {
 	parser.add_flag(  "-l,--list", list, "list audio input devices and exit");
 	parser.add_option("--inputdev", inputNum, "audio input device number");
 	parser.add_option("--inputname", inputName, "audio input device name, can do partial match, ex. \"Microphone\"");
+	parser.add_option("--inputchan", inputChannel, "audio input device channel, default 1");
+	parser.add_option("-r,--samplerate", sampleRate, "audio input device samplerate, can be 441000 or a multiple of " +
+		ofToString(ofApp::modelSampleRate) +  ", default " + ofToString(app->sampleRate));
 	parser.add_flag(  "-v,--verbose", verbose, "verbose printing");
 	parser.add_flag(  "--version", version, "print version and exit");
 
@@ -111,6 +116,31 @@ bool Commandline::parse(int argc, char **argv) {
 		}
 		else {
 			ofLogWarning(PACKAGE) << "audio input name not found: " << inputName;
+		}
+	}
+
+	// set audio input channel
+	if(inputChannel > 0) {
+		app->inputChannel = inputChannel-1; // 1-index to 0-index
+	}
+
+	// set audio input rate
+	if(sampleRate > 0) {
+		bool set = true;
+		if(sampleRate == 44100) {
+			// treat as 48k default, pitch change is minimal enough to not affect detection
+			// and we don't handle non-integer downsampling factors
+			app->sampleRate = sampleRate;
+			app->downsamplingFactor = 3;
+			set = false;
+		}
+		else if(sampleRate % ofApp::modelSampleRate != 0) {
+			ofLogWarning(PACKAGE) << "ignoring input sample rate which is not a multiple of "
+			                      << ofApp::modelSampleRate << ": " << sampleRate;
+		}
+		if(set) {
+			app->sampleRate = sampleRate;
+			app->downsamplingFactor = sampleRate / ofApp::modelSampleRate;
 		}
 	}
 

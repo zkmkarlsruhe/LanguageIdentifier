@@ -53,16 +53,19 @@ class ofApp : public ofBaseApp {
 		// audio 
 		ofSoundStream soundStream;
 		int inputDevice = -1;
+		int inputChannel = 0;
+		std::vector<float> monoBuffer; //< mono inputChannel stream buffer
 
 		// neural network input parameters
 		// for ease of use:
 		// we want to keep the buffersize a multiple of the downsampling factor
-		// downsamplingFactor = micSamplingRate / neuralNetworkInputSamplingRate
-		std::size_t bufferSize = 1024;
-		std::size_t samplingRate = 48000;
-		// downsamplingFactor must be an integer of samplingRate / inputSamplingeRate
+		// downsamplingFactor = sampleRate / modelSampleRate
 		// downsampling is required for microphones that do not have 16kHz sampling
+		std::size_t bufferSize = 1024;
+		std::size_t sampleRate = 48000;
 		std::size_t downsamplingFactor = 3;
+
+		static const std::size_t modelSampleRate; //< sample rate expected by model
 		
 		// since volume detection has some latency we keep a history of buffers
 		AudioBufferFifo previousBuffers;
@@ -80,7 +83,6 @@ class ofApp : public ofBaseApp {
 		// display
 		std::vector<float> volHistory;
 		std::string displayLabel = " ";
-		float minConfidence = 0.75;
 
 		// neural network	
 		AudioClassifier model;
@@ -88,6 +90,7 @@ class ofApp : public ofBaseApp {
 		std::size_t inputSeconds = 5;
 		const std::size_t inputSamplingRate = 16000; // AI was trained on 16kHz
 		std::size_t inputSize;
+		float minConfidence = 0.75;
 
 		// neural network control logic
 		std::size_t recordingCounter = 0;
