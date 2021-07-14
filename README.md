@@ -112,7 +112,7 @@ Additional run time settings are available via commandline options as shown via 
 
 ```shell
 % bin/LanguageIdentifier --help
-Listens to audio stream, identifies spoken language, and sends over OSC
+identifies spoken language from audio stream
 Usage: LanguageIdentifier [OPTIONS]
 
 Options:
@@ -125,8 +125,10 @@ Options:
   -l,--list                   list audio input devices and exit
   --inputdev INT              audio input device number
   --inputname TEXT            audio input device name, can do partial match, ex. "Microphone"
+  --inputchan INT             audio input device channel, default 1
+  -r,--samplerate INT         audio input device samplerate, can be 441000 or a multiple of 16000, default 48000
   -v,--verbose                verbose printing
-
+  --version                   print version and exit
 ```
 
 For example, to send OSC to multiple addresses use the `-s` option:
