@@ -3,11 +3,11 @@ Language Identifier
 
 ![screenshot](media/screenshot.png)
 
-Identification of chosen languages from 5s long audio snippets
+Identification of chosen languages from a live audio stream
  
 This code base has been developed by [ZKM | Hertz-Lab](https://zkm.de/en/about-the-zkm/organization/hertz-lab) as part of the project [»The Intelligent Museum«](#the-intelligent-museum). 
 
-Please raise issues, ask questions, throw in ideas or submit code, as this repository is intended to be an open platform to collaboratively improve langugae identification.
+Please raise issues, ask questions, throw in ideas or submit code, as this repository is intended to be an open platform to collaboratively improve language identification.
 
 Copyright (c) 2021 ZKM | Karlsruhe.  
 Copyright (c) 2021 Paul Bethge.  
@@ -139,7 +139,7 @@ For example, to send OSC to multiple addresses use the `-s` option:
 
 #### macOS
 
-For macOS, the application binary can be involked from within the .app bundle to pass commandline arguments:
+For macOS, the application binary can be invoked from within the .app bundle to pass commandline arguments:
 
 ```shell
 bin/LanguageIdentifier.app/Contents/MacOS/LanguageIdentifier -h
