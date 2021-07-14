@@ -19,7 +19,7 @@
 void ofApp::setup() {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
-	ofSetWindowTitle("Language Identifier");
+	ofSetWindowTitle(PACKAGE);
 	ofSetCircleResolution(80);
 	ofBackground(54, 54, 54);
 
@@ -48,12 +48,12 @@ void ofApp::setup() {
 			}
 		}
 		if(inputDevice < 0) {
-			ofLogError("LangID") << "no audio input device";
+			ofLogError(PACKAGE) << "no audio input device";
 			std::exit(EXIT_FAILURE);
 		}
 	}
 	auto devices = soundStream.getDeviceList();
-	ofLogNotice("LangID") << "audio input device: " << inputDevice << " " << devices[inputDevice].name;
+	ofLogNotice(PACKAGE) << "audio input device: " << inputDevice << " " << devices[inputDevice].name;
 	settings.setInDevice(devices[inputDevice]);
 	settings.setInListener(this);
 	settings.sampleRate = samplingRate;
@@ -61,7 +61,7 @@ void ofApp::setup() {
 	settings.numInputChannels = 1;
 	settings.bufferSize = bufferSize;
 	if(!soundStream.setup(settings)) {
-		ofLogError("LangID") << "audio input device " << inputDevice << " setup failed";
+		ofLogError(PACKAGE) << "audio input device " << inputDevice << " setup failed";
 		std::exit(EXIT_FAILURE);
 	}
 
@@ -69,29 +69,29 @@ void ofApp::setup() {
 	volHistory.assign(400, 0.0);
 
 	// print language labels we know
-	ofLogVerbose("LangID") << "From src/Labels.h:";
-	ofLogVerbose("LangID") << "----> detected languages";
+	ofLogVerbose(PACKAGE) << "From src/Labels.h:";
+	ofLogVerbose(PACKAGE) << "----> detected languages";
 	for(const auto & label : labelsMap) {
-		ofLogVerbose("LangID") << label.second;
+		ofLogVerbose(PACKAGE) << label.second;
 	}
-	ofLogVerbose("LangID") << "<---- detected languages";
+	ofLogVerbose(PACKAGE) << "<---- detected languages";
 
 	// warm up: inital inference involves initalization (takes longer)
 	auto test = cppflow::fill({1, 80000, 1}, 1.0f);
 	output = model.runModel(test);
 
 	// osc
-	ofLogNotice("LangID") << hosts.size() << " sender host(s)";
+	ofLogNotice(PACKAGE) << hosts.size() << " sender host(s)";
 	for(auto host : hosts) {
 		ofxOscSender *sender = new ofxOscSender;
 		if(sender->setup(host.address, host.port)) {
 			senders.push_back(sender);
-			ofLogNotice("LangID") << " " << host.address << " " << host.port;
+			ofLogNotice(PACKAGE) << " " << host.address << " " << host.port;
 		}
 	}
 
-	ofLogVerbose("LangID") << "Setup done";
-	ofLogVerbose("LangID") << "============================";
+	ofLogVerbose(PACKAGE) << "Setup done";
+	ofLogVerbose(PACKAGE) << "============================";
 }
 
 //--------------------------------------------------------------
@@ -127,9 +127,9 @@ void ofApp::update() {
 		}
 
 		// look up label
-		ofLogVerbose("LangID") << "Label: " << labelsMap[argMax];
-		ofLogVerbose("LangID") << "Probabilty: " << prob;
-		ofLogVerbose("LangID") << "============================";
+		ofLogVerbose(PACKAGE) << "Label: " << labelsMap[argMax];
+		ofLogVerbose(PACKAGE) << "Probabilty: " << prob;
+		ofLogVerbose(PACKAGE) << "============================";
 
 		// release the trigger signal and emit enable
 		trigger = false;
@@ -234,7 +234,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 	// trigger recording if the smoothed volume is high enough
 	if(ofMap(smoothedVol, 0.0, 0.17, 0.0, 1.0, true) * 100 >= volThreshold && enable) {
 		enable = false;
-		ofLogVerbose("LangID") << "Start recording...";
+		ofLogVerbose(PACKAGE) << "Start recording...";
 		// copy previous buffers to the recording
 		sampleBuffers = previousBuffers;
 		sampleBuffers.setMaxLen(numBuffers); // just to make sure (not tested)
@@ -255,7 +255,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 			if(recordingCounter >= numBuffers) {
 				recording = false;
 				trigger = true;
-				ofLogVerbose("LangID") << "Done!";
+				ofLogVerbose(PACKAGE) << "Done!";
 			}
 		}
 		// if not recording: save the incoming buffer to the previous buffer fifo

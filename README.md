@@ -171,6 +171,19 @@ To set up a run environment on macOS, download loaf and place the .app in the sy
 
 To run a loaf project, drag the main Lua script or project folder onto the loaf.app.
 
+Develop
+-------
+
+### Release steps
+
+1. Update changelog
+2. Update app version in Xcode project and ofApp.h define
+3. Tag version commit, ala "0.3.0"
+4. Push commit and tags to server:
+
+    git commit push
+    git commit push --tags
+
 The Intelligent Museum
 ----------------------
 

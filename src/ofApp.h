@@ -22,6 +22,11 @@
 #include "AudioClassifier.h"
 #include "Labels.h"
 
+// autotools-style config.h defines
+#define PACKAGE "LanguageIdentifier"
+#define VERSION "0.3.0"
+#define DESCRIPTION "identifies spoken language from audio stream"
+
 class ofApp : public ofBaseApp {
 
 	public:
