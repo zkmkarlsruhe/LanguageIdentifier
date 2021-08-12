@@ -76,6 +76,9 @@ void ofApp::setup() {
 		std::exit(EXIT_FAILURE);
 	}
 	monoBuffer.resize(bufferSize);
+	if(!listening) {
+		soundStream.stop();
+	}
 
 	// display
 	volHistory.assign(400, 0.0);
@@ -357,7 +360,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 //--------------------------------------------------------------
 void ofApp::startListening() {
-	if(listening) {return;}
 	enable = true;
 	soundStream.start();
 	listening = true;
@@ -366,7 +368,6 @@ void ofApp::startListening() {
 
 //--------------------------------------------------------------
 void ofApp::stopListening() {
-	if(!listening) {return;}
 	soundStream.stop();
 	previousBuffers.clear();
 	sampleBuffers.clear();

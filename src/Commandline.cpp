@@ -23,17 +23,20 @@ bool Commandline::parse(int argc, char **argv) {
 
 	// local options, the rest are ofApp instance variables
 	std::vector<std::string> senders;
+	int port = 0;
 	bool list = false;
 	int inputNum = -1;
 	std::string inputName = "";
 	int inputChannel = 0;
 	int sampleRate = 0;
+	bool nolisten = false;
 	bool verbose = false;
 	bool version = false;
 
 	parser.add_option("-s,--senders", senders,
 		"OSC sender addr:port host pairs, ex. \"192.168.0.100:5555\" "
 		"or multicast \"239.200.200.200:6666\", default \"localhost:9999\"")->expected(-1);
+	parser.add_option("-p,--port", port, "OSC receiver port, default " + ofToString(app->port));
 	parser.add_option("-c,--confidence", app->minConfidence,
 		"min confidence, default " + ofToString(app->minConfidence))->transform(CLI::Bound(0.0, 1.0));
 	parser.add_option("-t,--threshold", app->volThreshold,
@@ -44,6 +47,7 @@ bool Commandline::parse(int argc, char **argv) {
 	parser.add_option("--inputchan", inputChannel, "audio input device channel, default 1");
 	parser.add_option("-r,--samplerate", sampleRate, "audio input device samplerate, can be 441000 or a multiple of " +
 		ofToString(ofApp::modelSampleRate) +  ", default " + ofToString(app->sampleRate));
+	parser.add_flag(  "--nolisten", nolisten, "do not listen on start");
 	parser.add_flag(  "-v,--verbose", verbose, "verbose printing");
 	parser.add_flag(  "--version", version, "print version and exit");
 
@@ -171,6 +175,21 @@ bool Commandline::parse(int argc, char **argv) {
 	}
 	if(app->hosts.empty()) { // default
 		app->hosts.push_back(ofApp::OscHost("localhost", 9999));
+	}
+
+	// receiver port
+	if(port > 0) {
+		if(port <= 1024) {
+			ofLogWarning(PACKAGE) << "ignoring receiver port in system range (0-1024): " << port;
+		}
+		else {
+			app->port = port;
+		}
+	}
+
+	// no listen
+	if(nolisten) {
+		app->stopListening();
 	}
 
 	return true;
