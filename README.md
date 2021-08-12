@@ -118,6 +118,7 @@ Usage: LanguageIdentifier [OPTIONS]
 Options:
   -h,--help                   Print this help message and exit
   -s,--senders TEXT ...       OSC sender addr:port host pairs, ex. "192.168.0.100:5555" or multicast "239.200.200.200:6666", default "localhost:9999"
+  -p,--port INT               OSC receiver port, default 9898
   -c,--confidence FLOAT:FLOAT bounded to [0 - 1]
                               min confidence, default 0.75
   -t,--threshold FLOAT:INT bounded to [0 - 100]
@@ -127,6 +128,8 @@ Options:
   --inputname TEXT            audio input device name, can do partial match, ex. "Microphone"
   --inputchan INT             audio input device channel, default 1
   -r,--samplerate INT         audio input device samplerate, can be 441000 or a multiple of 16000, default 48000
+  --nolisten                  do not listen on start
+  --autostop                  stop listening automatically after detection
   -v,--verbose                verbose printing
   --version                   print version and exit
 ```
@@ -136,6 +139,17 @@ For example, to send OSC to multiple addresses use the `-s` option:
 ```shell
 % bin/LanguageIdentifier -s localhost:9999 localhost:6666 192.168.0.101:7777
 ```
+
+#### OSC spec
+
+LanguageIdentifier listens on port 9898 by default and responds to the following OSC messages:
+
+* **/listen**: start listening
+* **/listen _state_**: start/stop listening
+  - state: bool, 0 - stop, 1 - start
+* **/autostop**: enable listening auto stop after detection
+* **/autostop _state_**: enable/disable listening auto stop after detection
+  - state: bool, 0 - keep listening, 1 - stop on detection
 
 #### macOS
 

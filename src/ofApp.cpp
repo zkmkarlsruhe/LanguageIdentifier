@@ -311,13 +311,23 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-	if(key == 'l') {
-		if(listening) {
-			stopListening();
-		}
-		else {
-			startListening();
-		}
+	switch(key) {
+		case 'l':
+			if(listening) {
+				stopListening();
+			}
+			else {
+				startListening();
+			}
+			break;
+		case 'a':
+			if(autostop) {
+				enableAutostop();
+			}
+			else {
+				disableAutostop();
+			}
+			break;
 	}
 }
 
@@ -400,14 +410,48 @@ void ofApp::stopListening() {
 }
 
 //--------------------------------------------------------------
+void ofApp::enableAutostop() {
+	if(!autostop) {
+		ofLogVerbose(PACKAGE) << "autostop " << autostop;
+	}
+	autostop = true;
+}
+
+//--------------------------------------------------------------
+void ofApp::disableAutostop() {
+	if(autostop) {
+		ofLogVerbose(PACKAGE) << "autostop " << autostop;
+	}
+	autostop = false;
+}
+
+//--------------------------------------------------------------
 void ofApp::oscReceived(const ofxOscMessage &message) {
 	if(message.getAddress() == "/listen") {
-		if(message.getNumArgs() > 0) {
+		if(message.getNumArgs() == 0) {
+			if(!listening) {
+				startListening();
+			}
+		}
+		else if(message.getNumArgs() == 1) {
 			if(message.getArgAsBool(0)) {
 				startListening();
 			}
 			else {
 				stopListening();
+			}
+		}
+	}
+	else if(message.getAddress() == "/autostop") {
+		if(message.getNumArgs() == 0) {
+			enableAutostop();
+		}
+		else if(message.getNumArgs() == 1) {
+			if(message.getArgAsBool(0)) {
+				enableAutostop();
+			}
+			else {
+				disableAutostop();
 			}
 		}
 	}

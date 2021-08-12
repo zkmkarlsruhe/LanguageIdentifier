@@ -56,6 +56,12 @@ class ofApp : public ofBaseApp {
 		/// stop listening
 		void stopListening();
 
+		/// enable listening auto stop after detection
+		void enableAutostop();
+
+		/// disable listening auto stop after detection
+		void disableAutostop();
+
 		/// osc receiver callback
 		void oscReceived(const ofxOscMessage &message);
 
