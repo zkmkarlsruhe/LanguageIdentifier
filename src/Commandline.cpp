@@ -30,6 +30,7 @@ bool Commandline::parse(int argc, char **argv) {
 	int inputChannel = 0;
 	int sampleRate = 0;
 	bool nolisten = false;
+	bool autostop = false;
 	bool verbose = false;
 	bool version = false;
 
@@ -48,6 +49,7 @@ bool Commandline::parse(int argc, char **argv) {
 	parser.add_option("-r,--samplerate", sampleRate, "audio input device samplerate, can be 441000 or a multiple of " +
 		ofToString(ofApp::modelSampleRate) +  ", default " + ofToString(app->sampleRate));
 	parser.add_flag(  "--nolisten", nolisten, "do not listen on start");
+	parser.add_flag(  "--autostop", autostop, "stop listening automatically after detection");
 	parser.add_flag(  "-v,--verbose", verbose, "verbose printing");
 	parser.add_flag(  "--version", version, "print version and exit");
 
@@ -190,6 +192,11 @@ bool Commandline::parse(int argc, char **argv) {
 	// no listen
 	if(nolisten) {
 		app->stopListening();
+	}
+
+	// auto stop
+	if(autostop) {
+		app->autostop = true;
 	}
 
 	return true;

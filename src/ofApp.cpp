@@ -96,16 +96,24 @@ void ofApp::setup() {
 	output = model.runModel(test);
 
 	// osc
-	ofLogNotice(PACKAGE) << hosts.size() << " sender host(s)";
+	ofLogNotice(PACKAGE) << hosts.size() << " osc sender host(s)";
 	for(auto host : hosts) {
 		ofxOscSender *sender = new ofxOscSender;
 		if(sender->setup(host.address, host.port)) {
 			senders.push_back(sender);
-			ofLogNotice(PACKAGE) << " " << host.address << " " << host.port;
+			ofLogNotice(PACKAGE) << "  " << host.address << " " << host.port;
 		}
 	}
-	ofLogNotice(PACKAGE) << "receiver port " << port;
+	ofLogNotice(PACKAGE) << "osc receiver port " << port;
 	receiver.setup(port);
+
+	// behavior
+	if(!listening) {
+		ofLogNotice(PACKAGE) << "no listen: true";
+	}
+	if(autostop) {
+		ofLogNotice(PACKAGE) << "auto stop: true";
+	}
 
 	ofLogVerbose(PACKAGE) << "Setup done";
 	ofLogVerbose(PACKAGE) << "============================";
@@ -165,6 +173,11 @@ void ofApp::update() {
 		message.setAddress("/detecting");
 		message.addIntArg(0);
 		for(auto sender: senders) {sender->sendMessage(message);}
+
+		// stop after detection?
+		if(autostop) {
+			stopListening();
+		}
 	}
 
 	if(recordingStarted) {

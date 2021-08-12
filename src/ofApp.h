@@ -106,7 +106,8 @@ class ofApp : public ofBaseApp {
 		std::size_t recordingCounter = 0;
 		bool trigger = false;
 		bool enable = true;
-		bool recording = true;
+		bool autostop = false;
+		bool recording = false;
 		bool blink = true; // recording blink state
 		float blinkTimestamp = 0; // blink timestamp
 
