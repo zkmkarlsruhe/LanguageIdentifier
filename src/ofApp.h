@@ -120,6 +120,6 @@ class ofApp : public ofBaseApp {
 		std::vector<OscHost> hosts = {};
 		std::vector<ofxOscSender*> senders;
 		ofxOscReceiver receiver;
-		int port = 6006;
+		int port = 9898;
 		bool recordingStarted = false;
 };
