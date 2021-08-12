@@ -101,6 +101,8 @@ void ofApp::setup() {
 			ofLogNotice(PACKAGE) << " " << host.address << " " << host.port;
 		}
 	}
+	ofLogNotice(PACKAGE) << "receiver port " << port;
+	receiver.setup(port);
 
 	ofLogVerbose(PACKAGE) << "Setup done";
 	ofLogVerbose(PACKAGE) << "============================";
@@ -108,6 +110,14 @@ void ofApp::setup() {
 
 //--------------------------------------------------------------
 void ofApp::update() {
+
+	// process received osc events
+	while(receiver.hasWaitingMessages()) {
+		ofxOscMessage message;
+		if(receiver.getNextMessage(message)) {
+			oscReceived(message);
+		}
+	}
 
 	// lets scale the vol up to a 0-1 range 
 	scaledVol = ofMap(smoothedVol, 0.0, 0.17, 0.0, 1.0, true);
@@ -291,7 +301,14 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-
+	if(key == 'l') {
+		if(listening) {
+			stopListening();
+		}
+		else {
+			startListening();
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -342,4 +359,47 @@ void ofApp::gotMessage(ofMessage msg) {
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo) {
 
+}
+
+//--------------------------------------------------------------
+void ofApp::startListening() {
+	if(listening) {return;}
+	enable = true;
+	soundStream.start();
+	listening = true;
+	ofLogVerbose(PACKAGE) << "listening " << listening;
+}
+
+//--------------------------------------------------------------
+void ofApp::stopListening() {
+	if(!listening) {return;}
+	soundStream.stop();
+	previousBuffers.clear();
+	sampleBuffers.clear();
+	enable = false;
+	if(recording) {
+		recording = false;
+		// detection stopped
+		ofxOscMessage message;
+		message.setAddress("/detecting");
+		message.addIntArg(0);
+		for(auto sender: senders) {sender->sendMessage(message);}
+	}
+	trigger = false;
+	listening = false;
+	ofLogVerbose(PACKAGE) << "listening " << listening;
+}
+
+//--------------------------------------------------------------
+void ofApp::oscReceived(const ofxOscMessage &message) {
+	if(message.getAddress() == "/listen") {
+		if(message.getNumArgs() > 0) {
+			if(message.getArgAsBool(0)) {
+				startListening();
+			}
+			else {
+				stopListening();
+			}
+		}
+	}
 }

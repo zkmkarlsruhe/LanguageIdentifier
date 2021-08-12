@@ -43,6 +43,12 @@ class FixedFifo : public std::queue<T, Container> {
 			std::queue<T, Container>::push(value);
 		}
 
+		void clear() {
+			while(!this->empty()) {
+				this->pop();
+			}
+		}
+
 		void setMaxLen(const std::size_t maxLength) {
 			maxLen = maxLength;
 		}

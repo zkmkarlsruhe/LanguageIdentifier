@@ -50,11 +50,21 @@ class ofApp : public ofBaseApp {
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		/// start listening
+		void startListening();
+
+		/// stop listening
+		void stopListening();
+
+		/// osc receiver callback
+		void oscReceived(const ofxOscMessage &message);
+
 		// audio 
 		ofSoundStream soundStream;
 		int inputDevice = -1;
 		int inputChannel = 0;
 		std::vector<float> monoBuffer; //< mono inputChannel stream buffer
+		bool listening = true;
 
 		// neural network input parameters
 		// for ease of use:
@@ -108,5 +118,7 @@ class ofApp : public ofBaseApp {
 		} OscHost;
 		std::vector<OscHost> hosts = {};
 		std::vector<ofxOscSender*> senders;
+		ofxOscReceiver receiver;
+		int port = 6006;
 		bool recordingStarted = false;
 };
