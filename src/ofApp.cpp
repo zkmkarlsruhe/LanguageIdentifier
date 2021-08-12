@@ -193,19 +193,13 @@ void ofApp::draw() {
 		// draw the threshold line
 		ofDrawLine(0, historyHeight - volThreshold, 
 		              historyWidth, historyHeight - volThreshold);
-
-		ofSetColor(255);
 		
 		// lets draw the volume history as a graph
+		ofSetColor(255);
 		ofBeginShape();
 		for(unsigned int i = 0; i < volHistory.size(); i++) {
-			if(i == 0) {
-				ofVertex(i, historyHeight);
-			}
-			ofVertex(i, historyHeight - volHistory[i] * 100);
-			if(i == volHistory.size() - 1) {
-				ofVertex(i, historyHeight);
-			}
+			float y = historyHeight - volHistory[i] * 100;
+			ofVertex(i, y);
 		}
 		ofEndShape(false);
 			
@@ -376,6 +370,7 @@ void ofApp::stopListening() {
 	soundStream.stop();
 	previousBuffers.clear();
 	sampleBuffers.clear();
+	smoothedVol = 0;
 	enable = false;
 	if(recording) {
 		recording = false;
