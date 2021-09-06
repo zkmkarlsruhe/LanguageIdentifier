@@ -108,6 +108,8 @@ void ofApp::update() {
 		// only send & display label when probabilty is high enough
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
+			std::string cmd = ofToDataPath("send_http.sh") + " " + std::to_string(argMax);
+			ofSystem(cmd);
 			ofxOscMessage message;
 			message.setAddress("/lang");
 			message.addIntArg(argMax);
