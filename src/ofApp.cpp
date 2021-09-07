@@ -324,10 +324,10 @@ void ofApp::keyPressed(int key) {
 			break;
 		case 'a':
 			if(autostop) {
-				enableAutostop();
+				disableAutostop();
 			}
 			else {
-				disableAutostop();
+				enableAutostop();
 			}
 			break;
 	}
