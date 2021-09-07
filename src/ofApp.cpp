@@ -36,6 +36,9 @@ void ofApp::setup() {
 	numBuffers = sampleRate * inputSeconds / bufferSize;
 	previousBuffers.setMaxLen(numPreviousBuffers);
 	sampleBuffers.setMaxLen(numBuffers);
+	ofLogVerbose(PACKAGE) << "Looking " << std::to_string(numPreviousBuffers) << " into the past"
+					<< " and recording a total of " << std::to_string(numBuffers) << " buffers"
+					<< " each with " << std::to_string(bufferSize) << " samples"; 
 
 	// apply settings to soundStream
 	ofSoundStreamSettings settings;
