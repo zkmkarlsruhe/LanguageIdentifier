@@ -19,7 +19,7 @@ class WavFileWriterBeta {
 
 		std::string filename;
 
-	/// open file for a fixed-length number of samples
+		/// open file for a fixed-length number of samples
 		WavFileWriterBeta(std::string filename, unsigned short numChannels,
 			                                    unsigned long sampleRate,
 			                                    unsigned short bytesPerSample,
