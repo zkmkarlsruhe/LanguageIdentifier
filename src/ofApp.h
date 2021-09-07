@@ -67,9 +67,9 @@ class ofApp : public ofBaseApp {
 
 		// audio 
 		ofSoundStream soundStream;
-		int inputDevice = -1;
-		int inputChannel = 0;
-		std::vector<float> monoBuffer; //< mono inputChannel stream buffer
+		int inputDevice = -1;			// -1 means search for default device
+		int inputChannel = 0;			// 0 means mono, 1 means stereo
+		std::vector<float> monoBuffer;	//< mono inputChannel stream buffer
 		bool listening = true;
 
 		// neural network input parameters

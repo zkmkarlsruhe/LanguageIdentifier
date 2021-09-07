@@ -284,8 +284,8 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		ofLogVerbose(PACKAGE) << "Start recording...";
 		// copy previous buffers to the recording
 		sampleBuffers = previousBuffers;
-		sampleBuffers.setMaxLen(numBuffers); // just to make sure (not tested)
-		recordingCounter = sampleBuffers.size();
+		sampleBuffers.setMaxLen(numBuffers);		// hacky: last step overwrites maxLen
+		recordingCounter = sampleBuffers.size();	// we already have the previous buffer
 		// trigger recording in the next function call
 		recording = true;
 		recordingStarted = true;
