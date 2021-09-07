@@ -294,7 +294,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		// if recording: save the incoming buffer to the recording
 		// then trigger the neural network
 		if(recording) {
-			sampleBuffers.push(input.getBuffer());
+			sampleBuffers.push(monoBuffer);
 			recordingCounter++;
 			if(recordingCounter >= numBuffers) {
 				recording = false;
