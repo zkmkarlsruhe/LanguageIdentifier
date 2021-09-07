@@ -67,8 +67,8 @@ class ofApp : public ofBaseApp {
 
 		// audio 
 		ofSoundStream soundStream;
-		int inputDevice = -1;			// -1 means search for default device
-		int inputChannel = 0;			// 0 means mono, 1 means stereo
+		int inputDevice = -1; // -1 means search for default device
+		int inputChannel = 0; // 0 - chan 1 (left), 1 - chan 2 (right), 2 - chan 3, etc
 		bool listening = true;
 
 		// neural network input parameters
@@ -76,20 +76,17 @@ class ofApp : public ofBaseApp {
 		// we want to keep the buffersize a multiple of the downsampling factor
 		// downsamplingFactor = sampleRate / modelSampleRate
 		// downsampling is required for microphones that do not have 16kHz sampling
-		std::size_t bufferSize = 1024;
+		std::size_t bufferSize = 1024; //< in this case, number of sample frames
 		std::size_t sampleRate = 48000;
 		std::size_t downsamplingFactor = 3;
-		std::size_t recordedSamplesPerBuffer;
-		std::size_t numInputChannels;
 
-		
-		// since volume detection has some latency we keep a history of buffers
+		// since volume detection has some latency,d we keep a history of buffers
 		AudioBufferFifo previousBuffers;
 		std::size_t numPreviousBuffers = 10; // how many buffers to save before trigger happens
 		// sampleBuffers acts as a buffer for recording (could be fused)
 		AudioBufferFifo sampleBuffers;
 		std::size_t numBuffers;
-		SimpleAudioBuffer monoBuffer;	//< mono inputChannel stream buffer
+		SimpleAudioBuffer monoBuffer; //< mono inputChannel stream buffer
 		
 		// volume
 		float curVol = 0.0;

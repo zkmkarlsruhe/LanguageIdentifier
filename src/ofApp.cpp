@@ -64,17 +64,15 @@ void ofApp::setup() {
 		ofLogWarning(PACKAGE) << "audio input device does not have enough input channels";
 		inputChannel = 0;
 	}
-	numInputChannels = inputChannel+1;
-	recordedSamplesPerBuffer = bufferSize * numInputChannels;
 	ofLogNotice(PACKAGE) << "audio input channel: " << inputChannel;
 	ofLogNotice(PACKAGE) << "audio input samplerate: " << sampleRate;
-	ofLogNotice(PACKAGE) << "audio input buffer size: " << recordedSamplesPerBuffer;
+	ofLogNotice(PACKAGE) << "audio input buffer size: " << bufferSize;
 	settings.setInDevice(device);
 	settings.setInListener(this);
 	settings.sampleRate = sampleRate;
 	settings.numOutputChannels = 0;
-	settings.numInputChannels = numInputChannels;
-	settings.bufferSize = recordedSamplesPerBuffer;
+	settings.numInputChannels = inputChannel + 1;
+	settings.bufferSize = bufferSize * (inputChannel + 1);
 	if(!soundStream.setup(settings)) {
 		ofLogError(PACKAGE) << "audio input device " << inputDevice << " setup failed";
 		ofLogError(PACKAGE) << "perhaps try a different device or samplerate?";
@@ -83,6 +81,9 @@ void ofApp::setup() {
 	monoBuffer.resize(bufferSize);
 	if(!listening) {
 		soundStream.stop();
+	}
+	if(soundStream.getSampleRate() == 44100) {
+		ofLogWarning(PACKAGE) << "treating sample rate of 44100 as 48000, may or may not affect detection";
 	}
 
 	// display
@@ -255,11 +256,13 @@ void ofApp::exit() {
 
 //--------------------------------------------------------------
 void ofApp::audioIn(ofSoundBuffer & input) {
+	// beh, ofSoundBuffer::getNumFrames() actually returns the buffer size?
+	std::size_t numFrames = input.getNumFrames() / input.getNumChannels();
 
 	// copy desired channel out of interleaved stream into mono buffer,
 	// assume input stream has enough channels...
-	for(std::size_t i = 0; i < input.getNumFrames(); i++) {
-		monoBuffer[i] = input[i*numInputChannels+inputChannel];
+	for(std::size_t i = 0; i < numFrames; i++) {
+		monoBuffer[i] = input[(i*input.getNumChannels())+inputChannel];
 	}
 
 	// calculate the root mean square which is a rough way to calculate volume
