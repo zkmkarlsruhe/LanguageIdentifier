@@ -23,7 +23,7 @@ Dependencies
   - ofxOSC (included with oF)
   - [ofxTensorFlow2](https://github.com/zkmkarlsruhe/ofxTensorFlow2)
 * [CLI11 parser](https://github.com/CLIUtils/CLI11): included in `src`
-* Pre-trained language id model(s) placed in `bin/data` (included in this repo)
+* [Language Identification](https://github.com/zkmkarlsruhe/language-identification): trained neural networks placed in `bin/data` 
 
 Tested Platforms
 ----------------
