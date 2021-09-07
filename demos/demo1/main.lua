@@ -5,17 +5,23 @@
 
 local lang = {
 	{name = "noise",   locale = "xx"},
+	{name = "chinese", locale = "zh-cn"},
 	{name = "english", locale = "en"},
 	{name = "french",  locale = "fr"},
 	{name = "german",  locale = "de"},
+	{name = "italian",  locale = "it"},
+	{name = "russian",  locale = "ru"},
 	{name = "spanish", locale = "es"}
 }
 
 local greeting = {
 	xx = "...",
+	zh-cn = "你好", -- Ni Hao
 	en = "Hello",
-	de = "Guten Tag",
 	fr = "Bonjour",
+	de = "Guten Tag",
+	it = "Ciao",
+	ru = "Привет", -- Privet
 	es = "Hola"
 }
 
