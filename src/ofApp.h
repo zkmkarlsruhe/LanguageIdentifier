@@ -69,7 +69,6 @@ class ofApp : public ofBaseApp {
 		ofSoundStream soundStream;
 		int inputDevice = -1;			// -1 means search for default device
 		int inputChannel = 0;			// 0 means mono, 1 means stereo
-		std::vector<float> monoBuffer;	//< mono inputChannel stream buffer
 		bool listening = true;
 
 		// neural network input parameters
@@ -80,8 +79,9 @@ class ofApp : public ofBaseApp {
 		std::size_t bufferSize = 1024;
 		std::size_t sampleRate = 48000;
 		std::size_t downsamplingFactor = 3;
+		std::size_t recordedSamplesPerBuffer;
+		std::size_t numInputChannels;
 
-		static const std::size_t modelSampleRate; //< sample rate expected by model
 		
 		// since volume detection has some latency we keep a history of buffers
 		AudioBufferFifo previousBuffers;
@@ -89,6 +89,7 @@ class ofApp : public ofBaseApp {
 		// sampleBuffers acts as a buffer for recording (could be fused)
 		AudioBufferFifo sampleBuffers;
 		std::size_t numBuffers;
+		SimpleAudioBuffer monoBuffer;	//< mono inputChannel stream buffer
 		
 		// volume
 		float curVol = 0.0;
@@ -104,9 +105,9 @@ class ofApp : public ofBaseApp {
 		AudioClassifier model;
 		cppflow::tensor output;
 		std::size_t inputSeconds = 5;
-		const std::size_t inputSamplingRate = 16000; // AI was trained on 16kHz
 		std::size_t inputSize;
 		float minConfidence = 0.75;
+		static const std::size_t modelSampleRate; //< sample rate expected by model
 
 		// neural network control logic
 		std::size_t recordingCounter = 0;

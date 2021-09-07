@@ -64,15 +64,17 @@ void ofApp::setup() {
 		ofLogWarning(PACKAGE) << "audio input device does not have enough input channels";
 		inputChannel = 0;
 	}
-	ofLogNotice(PACKAGE) << "audio input channel: " << inputChannel+1;
+	numInputChannels = inputChannel + 1;
+	recordedSamplesPerBuffer = bufferSize * numInputChannels;
+	ofLogNotice(PACKAGE) << "audio input channel: " << numInputChannels;
 	ofLogNotice(PACKAGE) << "audio input samplerate: " << sampleRate;
-	ofLogNotice(PACKAGE) << "audio input buffer size: " << bufferSize;
+	ofLogNotice(PACKAGE) << "audio input buffer size: " << recordedSamplesPerBuffer;
 	settings.setInDevice(device);
 	settings.setInListener(this);
 	settings.sampleRate = sampleRate;
 	settings.numOutputChannels = 0;
-	settings.numInputChannels = inputChannel+1;
-	settings.bufferSize = bufferSize;
+	settings.numInputChannels = numInputChannels;
+	settings.bufferSize = bufferSize*numInputChannels;
 	if(!soundStream.setup(settings)) {
 		ofLogError(PACKAGE) << "audio input device " << inputDevice << " setup failed";
 		ofLogError(PACKAGE) << "perhaps try a different device or samplerate?";
@@ -254,16 +256,14 @@ void ofApp::exit() {
 //--------------------------------------------------------------
 void ofApp::audioIn(ofSoundBuffer & input) {
 
-	// this shouldn't happen... but we don't let it blow up
-	if(input.getNumFrames() != monoBuffer.size()) {
-		ofLogWarning(PACKAGE) << "resizing mono input buffer to " << input.getNumFrames();
-		monoBuffer.resize(input.getNumFrames());
-	}
-
 	// copy desired channel out of interleaved stream into mono buffer,
 	// assume input stream has enough channels...
 	for(std::size_t i = 0; i < input.getNumFrames(); i++) {
-		monoBuffer[i] = input[i + inputChannel];
+		float sum = 0;
+		for(std::size_t j = 0; j < numInputChannels; j++) {
+			sum = input[i*numInputChannels + j];
+		}
+		monoBuffer[i] = sum / numInputChannels;
 	}
 
 	// calculate the root mean square which is a rough way to calculate volume
