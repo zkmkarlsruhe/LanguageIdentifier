@@ -64,9 +64,9 @@ void ofApp::setup() {
 		ofLogWarning(PACKAGE) << "audio input device does not have enough input channels";
 		inputChannel = 0;
 	}
-	numInputChannels = inputChannel + 1;
+	numInputChannels = inputChannel+1;
 	recordedSamplesPerBuffer = bufferSize * numInputChannels;
-	ofLogNotice(PACKAGE) << "audio input channel: " << numInputChannels;
+	ofLogNotice(PACKAGE) << "audio input channel: " << inputChannel;
 	ofLogNotice(PACKAGE) << "audio input samplerate: " << sampleRate;
 	ofLogNotice(PACKAGE) << "audio input buffer size: " << recordedSamplesPerBuffer;
 	settings.setInDevice(device);
@@ -74,7 +74,7 @@ void ofApp::setup() {
 	settings.sampleRate = sampleRate;
 	settings.numOutputChannels = 0;
 	settings.numInputChannels = numInputChannels;
-	settings.bufferSize = bufferSize*numInputChannels;
+	settings.bufferSize = recordedSamplesPerBuffer;
 	if(!soundStream.setup(settings)) {
 		ofLogError(PACKAGE) << "audio input device " << inputDevice << " setup failed";
 		ofLogError(PACKAGE) << "perhaps try a different device or samplerate?";
@@ -259,11 +259,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 	// copy desired channel out of interleaved stream into mono buffer,
 	// assume input stream has enough channels...
 	for(std::size_t i = 0; i < input.getNumFrames(); i++) {
-		float sum = 0;
-		for(std::size_t j = 0; j < numInputChannels; j++) {
-			sum = input[i*numInputChannels + j];
-		}
-		monoBuffer[i] = sum / numInputChannels;
+		monoBuffer[i] = input[i*numInputChannels+inputChannel];
 	}
 
 	// calculate the root mean square which is a rough way to calculate volume
