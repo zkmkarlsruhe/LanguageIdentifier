@@ -26,8 +26,11 @@ void ofApp::setup() {
 	ofBackground(54, 54, 54);
 
 	// load the model, bail out on error
-	//std::string modelName = "model_4lang";  // model v1
-	std::string modelName = "model_attrnn"; // model v2
+	#ifdef USE_MODEL_V1
+		std::string modelName = "model_4lang";  // model v1
+	#else
+		std::string modelName = "model_7lang";  // model v2
+	#endif
 	if(!model.load(modelName)) {
 		std::exit(EXIT_FAILURE);
 	}

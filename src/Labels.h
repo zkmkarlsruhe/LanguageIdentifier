@@ -20,10 +20,25 @@
 
 typedef std::map<int, std::string> Labels;
 
-static Labels labelsMap = {
-	{0, "noise"},
-	{1, "english"},
-	{2, "french"},
-	{3, "german"},
-	{4, "spanish"},
-};
+#define USE_MODEL_V2
+
+#ifdef USE_MODEL_V1
+	static Labels labelsMap = {
+		{0, "noise"},
+		{1, "english"},
+		{2, "french"},
+		{3, "german"},
+		{4, "spanish"}
+	};
+#else
+	static Labels labelsMap = {
+		{0, "noise"},
+		{1, "chinese"},
+		{2, "english"},
+		{3, "french"},
+		{4, "german"},
+		{5, "italian"},
+		{6, "russian"}
+		{7, "spanish"},
+	};
+#endif
