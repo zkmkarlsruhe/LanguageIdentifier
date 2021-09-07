@@ -68,7 +68,7 @@ void ofApp::setup() {
 	settings.setInListener(this);
 	settings.sampleRate = sampleRate;
 	settings.numOutputChannels = 0;
-	settings.numInputChannels = device.inputChannels;
+	settings.numInputChannels = inputChannel+1;
 	settings.bufferSize = bufferSize;
 	if(!soundStream.setup(settings)) {
 		ofLogError(PACKAGE) << "audio input device " << inputDevice << " setup failed";
