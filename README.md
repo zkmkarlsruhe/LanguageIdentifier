@@ -91,7 +91,14 @@ Usage
 
 The openFrameworks application runs the language identification model using audio input. The detection status and detected language is sent out using OSC (Open Sound Control) messages.
 
+### Key Commands
+
+* `l`: toggle start/stop listening
+* `a`: toggle listening auto stop after detection
+
 ### OSC Communication
+
+#### Sending
 
 By default, sends to:
 * address: `localhost` ie. `127.0.0.1`
@@ -99,12 +106,26 @@ By default, sends to:
 
 Message specification:
 
-* **/detected status**: detection status
+* **/detected _status_**: detection status
   - status: float, boolean 1 found - 0 lost
-* **/lang index name confidence**: detected language
+* **/lang _index_ _name_ _confidence_**: detected language
   - index: int, language map index
   - name: string, language map name
   - confidence: float, confidence percentage 0 - 100
+
+#### Receiving
+
+By default, listens on:
+* port `9898`
+
+Message specification:
+
+* **/listen**: start listening
+* **/listen _state_**: start/stop listening
+  - state: bool, 0 - stop, 1 - start
+* **/autostop**: enable listening auto stop after detection
+* **/autostop _state_**: enable/disable listening auto stop after detection
+  - state: bool, 0 - keep listening, 1 - stop on detection
 
 ### Commandline Options
 
@@ -139,17 +160,6 @@ For example, to send OSC to multiple addresses use the `-s` option:
 ```shell
 % bin/LanguageIdentifier -s localhost:9999 localhost:6666 192.168.0.101:7777
 ```
-
-#### OSC spec
-
-LanguageIdentifier listens on port 9898 by default and responds to the following OSC messages:
-
-* **/listen**: start listening
-* **/listen _state_**: start/stop listening
-  - state: bool, 0 - stop, 1 - start
-* **/autostop**: enable listening auto stop after detection
-* **/autostop _state_**: enable/disable listening auto stop after detection
-  - state: bool, 0 - keep listening, 1 - stop on detection
 
 #### macOS
 
@@ -186,6 +196,15 @@ Custom visual front ends are written in Lua for [loaf](http://danomatika.com/cod
 To set up a run environment on macOS, download loaf and place the .app in the system `/Applications` folder.
 
 To run a loaf project, drag the main Lua script or project folder onto the loaf.app.
+
+Notes
+-----
+
+### Sample Rate
+
+The model inputs audio with a sample rate of 16 kHz, so the incoming stream is downsampled and the app's input sample rate needs to be a multiple of 16, ie. 48kHz, 92kHz, etc.
+
+As 44.1kHz is also common, it is accepted and treated as 48kHz but the downsampled audio is then higher in pitch and may be noisy. In our tests, however detection is still acceptable.
 
 Develop
 -------
