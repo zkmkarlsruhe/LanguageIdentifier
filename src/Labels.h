@@ -38,7 +38,7 @@ typedef std::map<int, std::string> Labels;
 		{3, "french"},
 		{4, "german"},
 		{5, "italian"},
-		{6, "russian"}
+		{6, "russian"},
 		{7, "spanish"},
 	};
 #endif
