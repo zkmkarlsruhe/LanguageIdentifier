@@ -155,6 +155,7 @@ void ofApp::update() {
 		model.classify(sampleBuffers, downsamplingFactor, argMax, prob);
 
 		// only send & display label when probabilty is high enough
+		bool detected = false;
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
 			ofxOscMessage message;
@@ -163,6 +164,7 @@ void ofApp::update() {
 			message.addStringArg(labelsMap[argMax]);
 			message.addFloatArg(prob * 100);
 			for(auto sender: senders) {sender->sendMessage(message);}
+			detected = true;
 		}
 		else {
 			displayLabel = " ";
@@ -183,8 +185,8 @@ void ofApp::update() {
 		message.addIntArg(0);
 		for(auto sender: senders) {sender->sendMessage(message);}
 
-		// stop after detection?
-		if(autostop) {
+		// stop after (successful) detection?
+		if(autostop && detected) {
 			stopListening();
 		}
 	}
