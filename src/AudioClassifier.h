@@ -61,7 +61,7 @@ class AudioClassifier : public ofxTF2::Model {
 	public:
 
 		void classify(AudioBufferFifo & bufferFifo, const std::size_t downsamplingFactor,
-					  int & argMax, float & prob) {
+					  int & argMax, float & prob, std::vector<float>  & outputVector) {
 
 			SimpleAudioBuffer sample;
 
@@ -87,7 +87,6 @@ class AudioClassifier : public ofxTF2::Model {
 			auto output = runModel(input);
 
 			// convert the output to std::vector
-			std::vector<float> outputVector;
 			ofxTF2::tensorToVector(output, outputVector);
 
 			// get element with highest probabilty

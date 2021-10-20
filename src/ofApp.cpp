@@ -87,6 +87,16 @@ void ofApp::setup() {
 	}
 }
 
+
+std::string resultTOString(Labels labelsMap, std::vector<float> outputVector){
+	std::string result;
+	for (size_t i = 0; i < outputVector.size(); i++)
+	{
+		result.append(labelsMap[i] + "=" + std::to_string(outputVector[i]) + " ");
+	}
+	return result;
+}
+
 //--------------------------------------------------------------
 void ofApp::update() {
 
@@ -103,12 +113,16 @@ void ofApp::update() {
 		// inference, sets argMax and prob after running model
 		int argMax;
 		float prob;
-		model.classify(sampleBuffers, downsamplingFactor, argMax, prob);
+		std::vector<float> outputVector;
+		model.classify(sampleBuffers, downsamplingFactor, argMax, prob, outputVector);
 
 		// only send & display label when probabilty is high enough
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
-			std::string cmd = ofToDataPath("send_http.sh") + " " + std::to_string(argMax);
+			std::string cmd_args = resultTOString(labelsMap, outputVector);
+			cmd_args.append("selected=" + displayLabel);
+			std::string cmd = ofToDataPath("send_http.sh") + " " + cmd_args;
+			ofLog() << cmd;
 			ofSystem(cmd);
 			ofxOscMessage message;
 			message.setAddress("/lang");
