@@ -22,6 +22,11 @@
 #include "AudioClassifier.h"
 #include "Labels.h"
 
+// autotools-style config.h defines
+#define PACKAGE "LanguageIdentifier"
+#define VERSION "0.3.0"
+#define DESCRIPTION "identifies spoken language from audio stream"
+
 class ofApp : public ofBaseApp {
 
 	public:
@@ -45,22 +50,43 @@ class ofApp : public ofBaseApp {
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+		/// start listening
+		void startListening();
+
+		/// stop listening
+		void stopListening();
+
+		/// enable listening auto stop after detection
+		void enableAutostop();
+
+		/// disable listening auto stop after detection
+		void disableAutostop();
+
+		/// osc receiver callback
+		void oscReceived(const ofxOscMessage &message);
+
 		// audio 
 		ofSoundStream soundStream;
+		int inputDevice = -1; // -1 means search for default device
+		int inputChannel = 0; // 0 - chan 1 (left), 1 - chan 2 (right), 2 - chan 3, etc
+		bool listening = true;
 
+		// neural network input parameters
 		// for ease of use:
 		// we want to keep the buffersize a multiple of the downsampling factor
-		// downsamplingFactor = micSamplingRate / neuralNetworkInputSamplingRate 
-		std::size_t downsamplingFactor;
-		std::size_t bufferSize;
-		std::size_t samplingRate;
-		
-		// since volume detection has some latency we keep a history of buffers
+		// downsamplingFactor = sampleRate / modelSampleRate
+		// downsampling is required for microphones that do not have 16kHz sampling
+		std::size_t bufferSize = 1024; //< in this case, number of sample frames
+		std::size_t sampleRate = 48000;
+		std::size_t downsamplingFactor = 3;
+
+		// since volume detection has some latency,d we keep a history of buffers
 		AudioBufferFifo previousBuffers;
-		std::size_t numPreviousBuffers;
+		std::size_t numPreviousBuffers = 10; // how many buffers to save before trigger happens
 		// sampleBuffers acts as a buffer for recording (could be fused)
 		AudioBufferFifo sampleBuffers;
 		std::size_t numBuffers;
+		SimpleAudioBuffer monoBuffer; //< mono inputChannel stream buffer
 		
 		// volume
 		float curVol = 0.0;
@@ -71,34 +97,33 @@ class ofApp : public ofBaseApp {
 		// display
 		std::vector<float> volHistory;
 		std::string displayLabel = " ";
-		float minConfidence = 0.75;
 
 		// neural network	
 		AudioClassifier model;
 		cppflow::tensor output;
-		std::size_t inputSeconds;
-		std::size_t inputSamplingRate;
+		std::size_t inputSeconds = 5;
 		std::size_t inputSize;
+		float minConfidence = 0.75;
+		static const std::size_t modelSampleRate; //< sample rate expected by model
 
 		// neural network control logic
 		std::size_t recordingCounter = 0;
 		bool trigger = false;
 		bool enable = true;
-		bool recording = true;
+		bool autostop = false;
+		bool recording = false;
 		bool blink = true; // recording blink state
 		float blinkTimestamp = 0; // blink timestamp
 
-
 		// osc
-		struct OscClient {
+		typedef struct OscHost {
 			std::string address;
 			int port;
-		};
-		std::vector<OscClient> hosts = {
-			// add multiple send host address/port pairs if needed
-			{"localhost", 9999},
-			//{"239.200.200.200", 5000} // multicast
-		};
+			OscHost(std::string a, int p) : address(a), port(p) {}
+		} OscHost;
+		std::vector<OscHost> hosts = {};
 		std::vector<ofxOscSender*> senders;
+		ofxOscReceiver receiver;
+		int port = 9898;
 		bool recordingStarted = false;
 };

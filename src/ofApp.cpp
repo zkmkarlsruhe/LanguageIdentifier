@@ -15,76 +15,117 @@
 
 #include "ofApp.h"
 
+const std::size_t ofApp::modelSampleRate = 16000;
+
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
-	ofSetWindowTitle("Language Identifier");
+	ofSetWindowTitle(PACKAGE);
 	ofSetCircleResolution(80);
 	ofBackground(54, 54, 54);
 
 	// load the model, bail out on error
-	//std::string modelName = "model_4lang";  // model v1
-	std::string modelName = "model_attrnn"; // model v2
+	#ifdef USE_MODEL_V1
+		std::string modelName = "model_4lang";  // model v1
+	#else
+		std::string modelName = "model_7lang";  // model v2
+	#endif
 	if(!model.load(modelName)) {
 		std::exit(EXIT_FAILURE);
 	}
 
-	// audio stream settings
-	bufferSize = 1023;
-	samplingRate = 48000; // take 16kHz if available then set downsamplingFactor to 1
-
-	// Neural network input parameters
-	// downsamplingFactor must be an integer of samplingRate / inputSamplingeRate
-	// downsampling is required for microphones that do not have 16kHz sampling
-	downsamplingFactor = 3;	
-	inputSeconds = 5;
-	inputSamplingRate = 16000; // shall not be changed, AI was trained on 16kHz
-
 	// recording settings
-	numPreviousBuffers = 10; // how many buffers to save before trigger happens
-	numBuffers = samplingRate * inputSeconds / bufferSize;
+	numBuffers = sampleRate * inputSeconds / bufferSize;
 	previousBuffers.setMaxLen(numPreviousBuffers);
 	sampleBuffers.setMaxLen(numBuffers);
+	ofLogVerbose(PACKAGE) << "Looking " << std::to_string(numPreviousBuffers) << " into the past"
+					<< " and recording a total of " << std::to_string(numBuffers) << " buffers"
+					<< " each with " << std::to_string(bufferSize) << " samples"; 
 
-	// display 
+	// apply settings to soundStream
+	ofSoundStreamSettings settings;
+	if(inputDevice < 0) {
+		// find default input device
+		auto devices = soundStream.getDeviceList();
+		for(int i = 0; i < devices.size(); ++i) {
+			auto device = devices[i];
+			if(device.isDefaultInput) {
+				inputDevice = i;
+				break;
+			}
+		}
+		if(inputDevice < 0) {
+			ofLogError(PACKAGE) << "no audio input device";
+			std::exit(EXIT_FAILURE);
+		}
+	}
+	auto devices = soundStream.getDeviceList();
+	ofSoundDevice &device = devices[inputDevice];
+	ofLogNotice(PACKAGE) << "audio input device: " << inputDevice << " " << device.name;
+	if(inputChannel >= device.inputChannels) {
+		ofLogWarning(PACKAGE) << "audio input device does not have enough input channels";
+		inputChannel = 0;
+	}
+	ofLogNotice(PACKAGE) << "audio input channel: " << inputChannel;
+	ofLogNotice(PACKAGE) << "audio input samplerate: " << sampleRate;
+	ofLogNotice(PACKAGE) << "audio input buffer size: " << bufferSize;
+	settings.setInDevice(device);
+	settings.setInListener(this);
+	settings.sampleRate = sampleRate;
+	settings.numOutputChannels = 0;
+	settings.numInputChannels = inputChannel + 1;
+	settings.bufferSize = bufferSize * (inputChannel + 1);
+	if(!soundStream.setup(settings)) {
+		ofLogError(PACKAGE) << "audio input device " << inputDevice << " setup failed";
+		ofLogError(PACKAGE) << "perhaps try a different device or samplerate?";
+		std::exit(EXIT_FAILURE);
+	}
+	monoBuffer.resize(bufferSize);
+	if(!listening) {
+		soundStream.stop();
+	}
+	if(soundStream.getSampleRate() == 44100) {
+		ofLogWarning(PACKAGE) << "treating sample rate of 44100 as 48000, may or may not affect detection";
+	}
+
+	// display
 	volHistory.assign(400, 0.0);
 
-	// apply settings to soundStream 
-	soundStream.printDeviceList();
-	ofSoundStreamSettings settings;
-	auto devices = soundStream.getMatchingDevices("default");
-	if(!devices.empty()) {
-		ofLog() << "input device: " << devices[0].name;
-		settings.setInDevice(devices[0]);
-	}
-	settings.setInListener(this);
-	settings.sampleRate = samplingRate;
-	settings.numOutputChannels = 0;
-	settings.numInputChannels = 1;
-	settings.bufferSize = bufferSize;
-	soundStream.setup(settings);
-
 	// print language labels we know
-	ofLog() << "From src/Labels.h:";
-	ofLog() << "----> detected languages";
+	ofLogVerbose(PACKAGE) << "From src/Labels.h:";
+	ofLogVerbose(PACKAGE) << "----> detected languages";
 	for(const auto & label : labelsMap) {
-		ofLog() << label.second;
+		ofLogVerbose(PACKAGE) << label.second;
 	}
-	ofLog() << "<---- detected languages";
+	ofLogVerbose(PACKAGE) << "<---- detected languages";
 
 	// warm up: inital inference involves initalization (takes longer)
 	auto test = cppflow::fill({1, 80000, 1}, 1.0f);
 	output = model.runModel(test);
-	ofLog() << "Setup done";
-	ofLog() << "============================";
 
 	// osc
+	ofLogNotice(PACKAGE) << hosts.size() << " osc sender host(s)";
 	for(auto host : hosts) {
 		ofxOscSender *sender = new ofxOscSender;
-		sender->setup(host.address, host.port);
-		senders.push_back(sender);
+		if(sender->setup(host.address, host.port)) {
+			senders.push_back(sender);
+			ofLogNotice(PACKAGE) << "  " << host.address << " " << host.port;
+		}
 	}
+	ofLogNotice(PACKAGE) << "osc receiver port " << port;
+	receiver.setup(port);
+
+	// behavior
+	if(!listening) {
+		ofLogNotice(PACKAGE) << "no listen: true";
+	}
+	if(autostop) {
+		ofLogNotice(PACKAGE) << "auto stop: true";
+	}
+
+	ofLogVerbose(PACKAGE) << "Setup done";
+	ofLogVerbose(PACKAGE) << "============================";
 }
 
 
@@ -99,6 +140,14 @@ std::string resultTOString(Labels labelsMap, std::vector<float> outputVector){
 
 //--------------------------------------------------------------
 void ofApp::update() {
+
+	// process received osc events
+	while(receiver.hasWaitingMessages()) {
+		ofxOscMessage message;
+		if(receiver.getNextMessage(message)) {
+			oscReceived(message);
+		}
+	}
 
 	// lets scale the vol up to a 0-1 range 
 	scaledVol = ofMap(smoothedVol, 0.0, 0.17, 0.0, 1.0, true);
@@ -117,6 +166,7 @@ void ofApp::update() {
 		model.classify(sampleBuffers, downsamplingFactor, argMax, prob, outputVector);
 
 		// only send & display label when probabilty is high enough
+		bool detected = false;
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
 			std::string cmd_args = resultTOString(labelsMap, outputVector);
@@ -130,15 +180,16 @@ void ofApp::update() {
 			message.addStringArg(labelsMap[argMax]);
 			message.addFloatArg(prob * 100);
 			for(auto sender: senders) {sender->sendMessage(message);}
+			detected = true;
 		}
 		else {
 			displayLabel = " ";
 		}
 
 		// look up label
-		ofLog() << "Label: " << labelsMap[argMax];
-		ofLog() << "Probabilty: " << prob;
-		ofLog() << "============================";
+		ofLogVerbose(PACKAGE) << "Label: " << labelsMap[argMax];
+		ofLogVerbose(PACKAGE) << "Probabilty: " << prob;
+		ofLogVerbose(PACKAGE) << "============================";
 
 		// release the trigger signal and emit enable
 		trigger = false;
@@ -149,6 +200,11 @@ void ofApp::update() {
 		message.setAddress("/detecting");
 		message.addIntArg(0);
 		for(auto sender: senders) {sender->sendMessage(message);}
+
+		// stop after (successful) detection?
+		if(autostop && detected) {
+			stopListening();
+		}
 	}
 
 	if(recordingStarted) {
@@ -180,19 +236,13 @@ void ofApp::draw() {
 		// draw the threshold line
 		ofDrawLine(0, historyHeight - volThreshold, 
 		              historyWidth, historyHeight - volThreshold);
-
-		ofSetColor(255);
 		
 		// lets draw the volume history as a graph
+		ofSetColor(255);
 		ofBeginShape();
 		for(unsigned int i = 0; i < volHistory.size(); i++) {
-			if(i == 0) {
-				ofVertex(i, historyHeight);
-			}
-			ofVertex(i, historyHeight - volHistory[i] * 100);
-			if(i == volHistory.size() - 1) {
-				ofVertex(i, historyHeight);
-			}
+			float y = historyHeight - volHistory[i] * 100;
+			ofVertex(i, y);
 		}
 		ofEndShape(false);
 			
@@ -227,27 +277,35 @@ void ofApp::exit() {
 
 //--------------------------------------------------------------
 void ofApp::audioIn(ofSoundBuffer & input) {
+	// beh, ofSoundBuffer::getNumFrames() actually returns the buffer size?
+	std::size_t numFrames = input.getNumFrames() / input.getNumChannels();
+
+	// copy desired channel out of interleaved stream into mono buffer,
+	// assume input stream has enough channels...
+	for(std::size_t i = 0; i < numFrames; i++) {
+		monoBuffer[i] = input[(i*input.getNumChannels())+inputChannel];
+	}
 
 	// calculate the root mean square which is a rough way to calculate volume
 	float sumVol = 0.0;
-	for(size_t i = 0; i < input.getNumFrames(); i++) {
-		float vol = input[i];
+	for(std::size_t i = 0; i < monoBuffer.size(); i++) {
+		float vol = monoBuffer[i];
 		sumVol += vol * vol;
 	}
-	curVol = sumVol / (float)input.getNumFrames();
+	curVol = sumVol / (float)monoBuffer.size();
 	curVol = sqrt(curVol);
-	// smoothen the volume
+	// smooth the volume
 	smoothedVol *= 0.5;
 	smoothedVol += 0.5 * curVol;
 
 	// trigger recording if the smoothed volume is high enough
 	if(ofMap(smoothedVol, 0.0, 0.17, 0.0, 1.0, true) * 100 >= volThreshold && enable) {
 		enable = false;
-		ofLog() << "Start recording...";
+		ofLogVerbose(PACKAGE) << "Start recording...";
 		// copy previous buffers to the recording
 		sampleBuffers = previousBuffers;
-		sampleBuffers.setMaxLen(numBuffers); // just to make sure (not tested)
-		recordingCounter = sampleBuffers.size();
+		sampleBuffers.setMaxLen(numBuffers);		// hacky: last step overwrites maxLen
+		recordingCounter = sampleBuffers.size();	// we already have the previous buffer
 		// trigger recording in the next function call
 		recording = true;
 		recordingStarted = true;
@@ -259,25 +317,41 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 		// if recording: save the incoming buffer to the recording
 		// then trigger the neural network
 		if(recording) {
-			sampleBuffers.push(input.getBuffer());
+			sampleBuffers.push(monoBuffer);
 			recordingCounter++;
 			if(recordingCounter >= numBuffers) {
 				recording = false;
 				trigger = true;
-				ofLog() << "Done!";
+				ofLogVerbose(PACKAGE) << "Done!";
 			}
 		}
 		// if not recording: save the incoming buffer to the previous buffer fifo
 		else {
-			previousBuffers.push(input.getBuffer());
+			previousBuffers.push(monoBuffer);
 		}
-
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-
+	switch(key) {
+		case 'l':
+			if(listening) {
+				stopListening();
+			}
+			else {
+				startListening();
+			}
+			break;
+		case 'a':
+			if(autostop) {
+				disableAutostop();
+			}
+			else {
+				enableAutostop();
+			}
+			break;
+	}
 }
 
 //--------------------------------------------------------------
@@ -328,4 +402,80 @@ void ofApp::gotMessage(ofMessage msg) {
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo) {
 
+}
+
+//--------------------------------------------------------------
+void ofApp::startListening() {
+	enable = true;
+	soundStream.start();
+	listening = true;
+	ofLogVerbose(PACKAGE) << "listening " << listening;
+}
+
+//--------------------------------------------------------------
+void ofApp::stopListening() {
+	soundStream.stop();
+	previousBuffers.clear();
+	sampleBuffers.clear();
+	smoothedVol = 0;
+	enable = false;
+	if(recording) {
+		recording = false;
+		// detection stopped
+		ofxOscMessage message;
+		message.setAddress("/detecting");
+		message.addIntArg(0);
+		for(auto sender: senders) {sender->sendMessage(message);}
+	}
+	trigger = false;
+	listening = false;
+	ofLogVerbose(PACKAGE) << "listening " << listening;
+}
+
+//--------------------------------------------------------------
+void ofApp::enableAutostop() {
+	if(!autostop) {
+		ofLogVerbose(PACKAGE) << "autostop " << autostop;
+	}
+	autostop = true;
+}
+
+//--------------------------------------------------------------
+void ofApp::disableAutostop() {
+	if(autostop) {
+		ofLogVerbose(PACKAGE) << "autostop " << autostop;
+	}
+	autostop = false;
+}
+
+//--------------------------------------------------------------
+void ofApp::oscReceived(const ofxOscMessage &message) {
+	if(message.getAddress() == "/listen") {
+		if(message.getNumArgs() == 0) {
+			if(!listening) {
+				startListening();
+			}
+		}
+		else if(message.getNumArgs() == 1) {
+			if(message.getArgAsBool(0)) {
+				startListening();
+			}
+			else {
+				stopListening();
+			}
+		}
+	}
+	else if(message.getAddress() == "/autostop") {
+		if(message.getNumArgs() == 0) {
+			enableAutostop();
+		}
+		else if(message.getNumArgs() == 1) {
+			if(message.getArgAsBool(0)) {
+				enableAutostop();
+			}
+			else {
+				disableAutostop();
+			}
+		}
+	}
 }
