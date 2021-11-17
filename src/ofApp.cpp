@@ -169,9 +169,11 @@ void ofApp::update() {
 		bool detected = false;
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
+			bool isGerman = (displayLabel.compare("german") == 0) ? true : false;
 			std::string cmd_args = resultTOString(labelsMap, outputVector);
 			cmd_args.append("selected=" + displayLabel);
-			std::string cmd = ofToDataPath("send_http.sh") + " " + cmd_args;
+			cmd_args.append("isGerman=" + std::to_string(isGerman));
+			std::string cmd = ofToDataPath("send_languages.sh") + " " + cmd_args;
 			ofLog() << cmd;
 			ofSystem(cmd);
 			ofxOscMessage message;
