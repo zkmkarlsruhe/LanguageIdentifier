@@ -21,7 +21,7 @@ case "$(uname -s)" in
 	Linux*)  ;;
 	Darwin*)
 		# invoke executable inside .app bundle
-		EXEC=$DIR/${LID}.app/Contents/MacOS/${LID}
+		EXEC="$DIR"/${LID}.app/Contents/MacOS/${LID}
 		;;
 	CYGWIN*) ;;
 	MINGW*)  ;;
