@@ -14,8 +14,15 @@
  */
 
 #include "ofApp.h"
+#include "ThreadPool.h"
 
 const std::size_t ofApp::modelSampleRate = 16000;
+
+// command worker task
+void executeCommand(std::string command) {
+	ofLogVerbose(PACKAGE) << command;
+	ofSystem(command);
+}
 
 //--------------------------------------------------------------
 void ofApp::setup() {
@@ -124,6 +131,11 @@ void ofApp::setup() {
 		ofLogNotice(PACKAGE) << "auto stop: true";
 	}
 
+	// command?
+	if(command != "") {
+		commandPool = new ThreadPool();
+	}
+
 	ofLogVerbose(PACKAGE) << "Setup done";
 	ofLogVerbose(PACKAGE) << "============================";
 }
@@ -168,11 +180,11 @@ void ofApp::update() {
 			message.addFloatArg(prob * 100);
 			for(auto sender: senders) {sender->sendMessage(message);}
 
-			// execute command?
+			// execute command in worker thread?
 			if(command != "") {
-				std::string params = + "selected=" + displayLabel + " " + resultToString(outputVector);
-				ofLogVerbose(PACKAGE) << command << " " << params << " &";
-				ofSystem(command + " " + params + " &");
+				std::string exec = command + " selected=" + displayLabel +
+				                   " " + resultToString(outputVector);
+				commandPool->schedule(std::bind(executeCommand, exec));
 			}
 
 			detected = true;
@@ -268,6 +280,10 @@ void ofApp::exit() {
 		delete sender;
 	}
 	senders.clear();
+	if(commandPool) {
+		delete commandPool;
+		commandPool = nullptr;
+	}
 }
 
 //--------------------------------------------------------------

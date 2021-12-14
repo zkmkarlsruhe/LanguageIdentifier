@@ -27,6 +27,8 @@
 #define VERSION "0.3.0"
 #define DESCRIPTION "identifies spoken language from audio stream"
 
+class ThreadPool;
+
 class ofApp : public ofBaseApp {
 
 	public:
@@ -132,4 +134,5 @@ class ofApp : public ofBaseApp {
 
 		// optional command to run on detection
 		std::string command = "";
+		ThreadPool *commandPool = nullptr; // background command pool
 };
