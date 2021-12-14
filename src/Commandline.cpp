@@ -33,6 +33,7 @@ bool Commandline::parse(int argc, char **argv) {
 	bool autostop = false;
 	bool verbose = false;
 	bool version = false;
+	std::string command = "";
 
 	parser.add_option("-s,--senders", senders,
 		"OSC sender addr:port host pairs, ex. \"192.168.0.100:5555\" "
@@ -50,6 +51,7 @@ bool Commandline::parse(int argc, char **argv) {
 		ofToString(ofApp::modelSampleRate) +  ", default " + ofToString(app->sampleRate));
 	parser.add_flag(  "--nolisten", nolisten, "do not listen on start");
 	parser.add_flag(  "--autostop", autostop, "stop listening automatically after detection");
+	parser.add_option("-e,--execute", command, "command to execute on detection with key=value pair args");
 	parser.add_flag(  "-v,--verbose", verbose, "verbose printing");
 	parser.add_flag(  "--version", version, "print version and exit");
 
@@ -197,6 +199,11 @@ bool Commandline::parse(int argc, char **argv) {
 	// auto stop
 	if(autostop) {
 		app->autostop = true;
+	}
+
+	// command
+	if(command != "") {
+		app->command = command;
 	}
 
 	return true;

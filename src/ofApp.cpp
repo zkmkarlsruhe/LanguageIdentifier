@@ -128,16 +128,6 @@ void ofApp::setup() {
 	ofLogVerbose(PACKAGE) << "============================";
 }
 
-
-std::string resultTOString(Labels labelsMap, std::vector<float> outputVector){
-	std::string result;
-	for (size_t i = 0; i < outputVector.size(); i++)
-	{
-		result.append(labelsMap[i] + "=" + std::to_string(outputVector[i]) + " ");
-	}
-	return result;
-}
-
 //--------------------------------------------------------------
 void ofApp::update() {
 
@@ -169,19 +159,22 @@ void ofApp::update() {
 		bool detected = false;
 		if(prob >= minConfidence) {
 			displayLabel = labelsMap[argMax];
-			bool isGerman = (displayLabel.compare("german") == 0) ? true : false;
-			std::string cmd_args = resultTOString(labelsMap, outputVector);
-			cmd_args.append("selected=" + displayLabel);
-			cmd_args.append("isGerman=" + std::to_string(isGerman));
-			std::string cmd = ofToDataPath("send_languages.sh") + " " + cmd_args;
-			ofLog() << cmd;
-			ofSystem(cmd);
+
+			// send osc
 			ofxOscMessage message;
 			message.setAddress("/lang");
 			message.addIntArg(argMax);
-			message.addStringArg(labelsMap[argMax]);
+			message.addStringArg(displayLabel);
 			message.addFloatArg(prob * 100);
 			for(auto sender: senders) {sender->sendMessage(message);}
+
+			// execute command?
+			if(command != "") {
+				std::string params = + "selected=" + displayLabel + " " + resultToString(outputVector);
+				ofLogVerbose(PACKAGE) << command << " " << params << " &";
+				ofSystem(command + " " + params + " &");
+			}
+
 			detected = true;
 		}
 		else {
@@ -480,4 +473,16 @@ void ofApp::oscReceived(const ofxOscMessage &message) {
 			}
 		}
 	}
+}
+
+//--------------------------------------------------------------
+std::string ofApp::resultToString(std::vector<float> outputVector) {
+	std::string result = "";
+	for(size_t i = 0; i < outputVector.size(); i++) {
+		result += labelsMap[i] + "=" + std::to_string(outputVector[i]);
+		if(i < outputVector.size()-1) {
+			result += " ";
+		}
+	}
+	return result;
 }

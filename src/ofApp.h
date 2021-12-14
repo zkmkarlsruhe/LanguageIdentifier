@@ -65,6 +65,9 @@ class ofApp : public ofBaseApp {
 		/// osc receiver callback
 		void oscReceived(const ofxOscMessage &message);
 
+		/// convert model results into a key=value string seperated by spaces
+		std::string resultToString(std::vector<float> outputVector);
+
 		// audio 
 		ofSoundStream soundStream;
 		int inputDevice = -1; // -1 means search for default device
@@ -126,4 +129,7 @@ class ofApp : public ofBaseApp {
 		ofxOscReceiver receiver;
 		int port = 9898;
 		bool recordingStarted = false;
+
+		// optional command to run on detection
+		std::string command = "";
 };
