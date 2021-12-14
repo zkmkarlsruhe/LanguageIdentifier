@@ -151,6 +151,7 @@ Options:
   -r,--samplerate INT         audio input device samplerate, can be 441000 or a multiple of 16000, default 48000
   --nolisten                  do not listen on start
   --autostop                  stop listening automatically after detection
+  -e,--execute TEXT           command to execute on detection with key=value pair args
   -v,--verbose                verbose printing
   --version                   print version and exit
 ```
@@ -180,6 +181,27 @@ Reload the shell and application can now be invoked via:
 ```shell
 % langid -v --inputdev 2
 ```
+
+### Executing commands
+
+LanguageIdentifier can execute a command on a language detection via the `-e/--execute` option:
+
+```shell
+% bin/LanguageIdentifier -e `pwd`/script.sh
+```
+
+The arguments passed to the command are a series of key & values pairs where `key=value`:
+
+* selected key: string value, name of detected language
+* LANG key: float value, normalized detection confidence 0-1 for each supported language
+
+Example args:
+
+~~~
+selected=noise noise=0.753628 chinese=0.000086 english=0.237782 french=0.001154 german=0.002538 italian=0.000791 russian=0.000018 spanish=0.004004
+~~~  
+
+_Note: In general, the command must include the full path if it is not in current shell PATH._
 
 Demos
 -----

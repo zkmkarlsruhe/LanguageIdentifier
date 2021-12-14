@@ -2,15 +2,18 @@
 
 * fix crash due to wrong prev buffer value
 
-* added audio support for multi-channel device input and settable samperate
+* added audio support for multi-channel device input and settable samplerate
 * added OSC receiver on default port 9898
 * added manual listening control via OSC /listen message and l key press
 * added listening auto stop on detection via OSC /autostop message or a key press
+* added optional command execution on detection
 * added commandline argument parsing
 * added verbose printing
 
+* now use 7 lang model
 * don't enable recording on start
 * dont draw extra graph start & end vertices
+* graph now goes to 0 when listening is stopped
 
 0.2.0: 2021 Jun 23
 
