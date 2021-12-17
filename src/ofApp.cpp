@@ -136,7 +136,7 @@ void ofApp::setup() {
 		commandPool = new ThreadPool();
 	}
 
-	ofLogVerbose(PACKAGE) << "Setup done";
+	ofLogVerbose(PACKAGE) << "setup done";
 	ofLogVerbose(PACKAGE) << "============================";
 }
 
@@ -194,8 +194,8 @@ void ofApp::update() {
 		}
 
 		// look up label
-		ofLogVerbose(PACKAGE) << "Label: " << labelsMap[argMax];
-		ofLogVerbose(PACKAGE) << "Probabilty: " << prob;
+		ofLogVerbose(PACKAGE) << "label: " << labelsMap[argMax];
+		ofLogVerbose(PACKAGE) << "confidence: " << ofToString(prob, 2);
 		ofLogVerbose(PACKAGE) << "============================";
 
 		// release the trigger signal and emit enable
@@ -312,7 +312,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 	// trigger recording if the smoothed volume is high enough
 	if(ofMap(smoothedVol, 0.0, 0.17, 0.0, 1.0, true) * 100 >= volThreshold && enable) {
 		enable = false;
-		ofLogVerbose(PACKAGE) << "Start recording...";
+		ofLogVerbose(PACKAGE) << "start recording...";
 		// copy previous buffers to the recording
 		sampleBuffers = previousBuffers;
 		sampleBuffers.setMaxLen(numBuffers);		// hacky: last step overwrites maxLen
@@ -333,7 +333,7 @@ void ofApp::audioIn(ofSoundBuffer & input) {
 			if(recordingCounter >= numBuffers) {
 				recording = false;
 				trigger = true;
-				ofLogVerbose(PACKAGE) << "Done!";
+				ofLogVerbose(PACKAGE) << "done!";
 			}
 		}
 		// if not recording: save the incoming buffer to the previous buffer fifo
