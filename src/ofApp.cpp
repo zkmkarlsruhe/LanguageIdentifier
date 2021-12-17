@@ -100,7 +100,6 @@ void ofApp::setup() {
 	volHistory.assign(400, 0.0);
 
 	// print language labels we know
-	ofLogVerbose(PACKAGE) << "From src/Labels.h:";
 	ofLogVerbose(PACKAGE) << "----> detected languages";
 	for(const auto & label : labelsMap) {
 		ofLogVerbose(PACKAGE) << label.second;
@@ -195,7 +194,7 @@ void ofApp::update() {
 
 		// look up label
 		ofLogVerbose(PACKAGE) << "label: " << labelsMap[argMax];
-		ofLogVerbose(PACKAGE) << "confidence: " << ofToString(prob, 2);
+		ofLogVerbose(PACKAGE) << "confidence: " << ofToString(prob * 100, 2);
 		ofLogVerbose(PACKAGE) << "============================";
 
 		// release the trigger signal and emit enable
