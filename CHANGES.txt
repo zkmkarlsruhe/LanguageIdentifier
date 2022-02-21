@@ -1,4 +1,4 @@
-0.3.0: TBD
+0.3.0: 2022 Feb 21
 
 * fix crash due to wrong prev buffer value
 
